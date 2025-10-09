@@ -473,9 +473,11 @@ class _RegistrationState extends State<Registration> {
             ? DateFormat('yyyy-MM-dd').format(selectedDOB!)
             : "",
         // convert DateTime to ISO string
-        "departmentId": selectedDepartment!.id,
-        "designationId": selectedDesignation!.id,
+        "department": selectedDepartment!.id,
+        "designation": selectedDesignation!.id,
       };
+
+      print(employee);
 
       // ✅ Initialize your API Service
       final apiService = AuthService();

@@ -1,14 +1,11 @@
-import 'department.dart';
-import 'designation.dart';
-
 class Employee {
   final int id;
   final String name;
   final String email;
-  final String? photo;         // optional
+  final String? photo; // optional
   final String? address;
   final String? gender;
-  final String? dateOfBirth;   // or DateTime
+  final String? dateOfBirth; // or DateTime
   final int? departmentId;
   final int? designationId;
   final String? joiningDate;
@@ -39,8 +36,12 @@ class Employee {
       address: json['address'],
       gender: json['gender'],
       dateOfBirth: json['dateOfBirth'],
-      departmentId: json['department'],
-      designationId: json['designation'],
+      // departmentId: json['department'],
+      // designationId: json['designation'],
+      // ✅ FIX: extract `id` from department and designation objects
+      departmentId: json['department'] is Map ? json['department']['id'] : json['department'],
+      designationId: json['designation'] is Map ? json['designation']['id'] : json['designation'],
+
       joiningDate: json['joiningDate'],
       phone: json['phone'],
       basicSalary: (json['basicSalary'] != null)

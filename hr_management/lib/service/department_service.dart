@@ -39,14 +39,4 @@ class DepartmentService {
     throw Exception('Failed to load departments');
   }
 
-  Future<List<Department>> getDesignations() async {
-    final response = await http.get(Uri.parse('$baseUrl/designation/by-department/'));
-    if (response.statusCode == 200) {
-      List data = jsonDecode(response.body);
-      return data.map((json) => Department.fromJson(json)).toList();
-    }
-    throw Exception('Failed to load departments');
-  }
-
-
 }
