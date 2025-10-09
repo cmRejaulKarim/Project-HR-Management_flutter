@@ -64,11 +64,13 @@ class _RegistrationState extends State<Registration> {
     super.initState();
     _loadDepartments();
   }
+
   Future<void> _loadDepartments() async {
     departments = await _departmentService.getDepartments();
     print(departments.toString());
     setState(() {});
   }
+
   Future<void> _loadDesignations(int departmentId) async {
     designations = await _designationService.getDesignations(departmentId);
     print(designations.toString());
@@ -195,26 +197,25 @@ class _RegistrationState extends State<Registration> {
                 SizedBox(height: 20.0),
 
                 DropdownButtonFormField<Department>(
-                value: selectedDepartment,
-                  decoration: const InputDecoration(
-                  labelText: 'Department',
-                  ),
+                  value: selectedDepartment,
+                  decoration: const InputDecoration(labelText: 'Department'),
                   items: departments.map((dept) {
-                    return DropdownMenuItem(value: dept, child: Text(dept.name));
+                    return DropdownMenuItem(
+                      value: dept,
+                      child: Text(dept.name),
+                    );
                   }).toList(),
                   onChanged: (value) {
-                  setState(() => selectedDepartment = value);
-                  if (value != null) _loadDesignations(value.id);
-                  }
+                    setState(() => selectedDepartment = value);
+                    if (value != null) _loadDesignations(value.id);
+                  },
                 ),
 
                 SizedBox(height: 20.0),
 
                 DropdownButtonFormField<Designation>(
                   value: selectedDesignation,
-                  decoration: const InputDecoration(
-                    labelText: 'Designation',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Designation'),
                   items: designations.map((designation) {
                     return DropdownMenuItem(
                       value: designation,
@@ -426,11 +427,10 @@ class _RegistrationState extends State<Registration> {
         return; // stop further execution
       }
       // ✅ Validate that a department is selected
-      if (selectedDepartment == null ||
-      selectedDesignation == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Department or Designation cannot be empty.')));
+      if (selectedDepartment == null || selectedDesignation == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Department or Designation cannot be empty.')),
+        );
         return; // stop further execution
       }
 

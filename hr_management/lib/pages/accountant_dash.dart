@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class AccountantDash extends StatelessWidget {
@@ -6,8 +5,6 @@ class AccountantDash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Text("Hello Accountant"),
-    );
+    return const Scaffold(body: Text("Hello Accountant"));
   }
 }

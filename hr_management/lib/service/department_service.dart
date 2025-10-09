@@ -11,9 +11,7 @@ class DepartmentService {
     try {
       final response = await http.get(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200) {
@@ -38,5 +36,4 @@ class DepartmentService {
     }
     throw Exception('Failed to load departments');
   }
-
 }

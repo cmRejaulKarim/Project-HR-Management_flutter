@@ -42,10 +42,7 @@ class AuthService {
     File? photoFile,
     Uint8List? photoBytes,
   }) async {
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/employee'),
-    );
+    var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/employee'));
 
     request.fields['user'] = jsonEncode(user);
     request.fields['employee'] = jsonEncode(employee);
@@ -88,11 +85,12 @@ class AuthService {
     }
     return true;
   }
+
   Future<bool> isLoggedIn() async {
     String? token = await getToken();
     if (token != null && !await isTokenExpired()) {
       return true;
-    }else{
+    } else {
       await logout();
       return false;
     }
@@ -106,16 +104,18 @@ class AuthService {
   Future<bool> isEmployee() async {
     return await hasRole(['EMPLOYEE']);
   }
+
   Future<bool> isAccountant() async {
     return await hasRole(['ACCOUNTANT']);
   }
+
   Future<bool> isAdmin() async {
     return await hasRole(['ADMIN']);
   }
+
   Future<bool> isDeptHead() async {
     return await hasRole(['DEPARTMENT_HEAD']);
   }
-
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
@@ -126,7 +126,9 @@ class AuthService {
       return;
     }
 
-    final url = Uri.parse('$baseUrl/auth/logout'); // Replace with your actual URL
+    final url = Uri.parse(
+      '$baseUrl/auth/logout',
+    ); // Replace with your actual URL
 
     try {
       final response = await http.post(
@@ -150,5 +152,4 @@ class AuthService {
     await prefs.remove('authToken');
     await prefs.remove('userRole');
   }
-
 }

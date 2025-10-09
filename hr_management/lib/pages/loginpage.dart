@@ -17,7 +17,6 @@ class LoginPage extends StatelessWidget {
   AuthService authService = AuthService();
   EmployeeService employeeService = EmployeeService();
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,7 +82,8 @@ class LoginPage extends StatelessWidget {
                   decoration: TextDecoration.underline,
                 ),
               ),
-            ),SizedBox(height: 20.0),
+            ),
+            SizedBox(height: 20.0),
             TextButton(
               onPressed: () {
                 Navigator.push(
@@ -132,11 +132,12 @@ class LoginPage extends StatelessWidget {
       } else if (role == 'EMPLOYEE') {
         final profile = await employeeService.getEmployeeProfile();
 
-        if(profile != null) {
+        if (profile != null) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) => EmployeeProfile(profile: profile)),
+              builder: (context) => EmployeeProfile(profile: profile),
+            ),
           );
         }
       } else {

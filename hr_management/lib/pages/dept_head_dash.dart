@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class DeptHeadDash extends StatelessWidget {
@@ -6,8 +5,6 @@ class DeptHeadDash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Text("Hello Dept Head"),
-    );
+    return const Scaffold(body: Text("Hello Dept Head"));
   }
 }

@@ -11,9 +11,7 @@ class DesignationService {
     try {
       final response = await http.get(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200) {
@@ -31,12 +29,13 @@ class DesignationService {
   }
 
   Future<List<Designation>> getDesignations(int departmentId) async {
-    final response = await http.get(Uri.parse('$baseUrl/designation/by-department/$departmentId'));
+    final response = await http.get(
+      Uri.parse('$baseUrl/designation/by-department/$departmentId'),
+    );
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);
       return data.map((json) => Designation.fromJson(json)).toList();
     }
     throw Exception('Failed to load designations');
   }
-
 }

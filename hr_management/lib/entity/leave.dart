@@ -26,7 +26,9 @@ class Leave {
   factory Leave.fromJson(Map<String, dynamic> json) {
     return Leave(
       id: json['id'],
-      employee: json['employee'] != null ? Employee.fromJson(json['employee']) : null,
+      employee: json['employee'] != null
+          ? Employee.fromJson(json['employee'])
+          : null,
       startDate: json['startDate'],
       endDate: json['endDate'],
       totalLeaveDays: json['totalLeaveDays'],

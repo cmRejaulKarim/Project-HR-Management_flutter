@@ -160,7 +160,10 @@ class LeaveService {
   // Delete leave
   Future<void> deleteLeave(int id) async {
     final headers = await getAuthHeaders();
-    final response = await http.delete(Uri.parse('${baseUrl}$id'), headers: headers);
+    final response = await http.delete(
+      Uri.parse('${baseUrl}$id'),
+      headers: headers,
+    );
     if (response.statusCode != 200) {
       throw Exception("Failed to delete leave");
     }
@@ -169,7 +172,10 @@ class LeaveService {
   // Get all leaves (Admin)
   Future<List<Leave>> getAllLeaves() async {
     final headers = await getAuthHeaders();
-    final response = await http.get(Uri.parse('${baseUrl}all'), headers: headers);
+    final response = await http.get(
+      Uri.parse('${baseUrl}all'),
+      headers: headers,
+    );
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);
       return data.map((json) => Leave.fromJson(json)).toList();
