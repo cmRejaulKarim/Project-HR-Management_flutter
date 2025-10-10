@@ -1,11 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:hr_management/service/authservice.dart';
+// Import the Employee model so the service can return a concrete type
+import 'package:hr_management/entity/employee.dart';
 
 class EmployeeService {
   final String baseUrl = "http://localhost:8085/api";
 
-  Future<Map<String, dynamic>?> getEmployeeProfile() async {
+  // CHANGED RETURN TYPE from Map<String, dynamic>? to Employee?
+  Future<Employee?> getEmployeeProfile() async {
+    // Using a new instance of AuthService to avoid dependency issues if not injected
     String? token = await AuthService().getToken();
 
     if (token == null) {
@@ -23,7 +27,10 @@ class EmployeeService {
       },
     );
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final Map<String, dynamic> json = jsonDecode(response.body);
+
+      // ✅ FIX: Convert the JSON map into an Employee object using the factory constructor
+      return Employee.fromJson(json);
     } else {
       print('Failed to fetch employee profile: ${response.body}');
       return null;
