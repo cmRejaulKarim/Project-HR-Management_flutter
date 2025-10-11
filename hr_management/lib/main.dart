@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hr_management/employee/employee_profile.dart';
 import 'package:hr_management/pages/loginpage.dart';
 import 'package:hr_management/pages/accountant_dash.dart';
 import 'package:hr_management/pages/adminpage.dart';

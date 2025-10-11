@@ -97,8 +97,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       });
     } catch (e) {
       debugPrint('Error loading dashboard data: $e');
-    }
-    finally {
+    } finally {
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -106,7 +105,6 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       }
     }
   }
-
 
   // --- Advance Form Visibility Logic ---
   bool get _canRequestAdvanceThisMonth {
@@ -728,6 +726,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       ),
     );
   }
+
   Widget _buildLeaveRequestTriggerButton() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -748,20 +747,12 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     );
   }
 
-
   // --- Main Build Method ---
   @override
   Widget build(BuildContext context) {
-    final String baseurl = "http://localhost:8085/images/employee/";
-    final String? photo = widget.profile.photo;
-
-    final String? photoUrl = (photo != null && photo.isNotEmpty)
-        ? "$baseurl$photo"
-        : null;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Employee Dashboard'),
+        title: const Text('Employee\'s Status'),
         backgroundColor: Colors.purple,
         actions: [
           IconButton(

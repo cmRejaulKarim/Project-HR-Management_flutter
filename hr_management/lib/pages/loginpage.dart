@@ -61,7 +61,6 @@ class LoginPage extends StatelessWidget {
                   color: Colors.white, // Changed to white for better contrast
                 ),
               ),
-
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,
                 // Removed deprecated 'foregroundColor: Colors.grey,' property
