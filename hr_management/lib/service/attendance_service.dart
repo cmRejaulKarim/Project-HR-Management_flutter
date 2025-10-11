@@ -20,9 +20,24 @@ class AttendanceService {
     );
 
     if (response.statusCode == 200) {
-      return Attendance.fromJson(jsonDecode(response.body));
+      final body = response.body.trim();
+
+      // ✅ Handle empty or blank body
+      if (body.isEmpty) {
+        print("No attendance log for today.");
+        return null;
+      }
+
+      try {
+        return Attendance.fromJson(jsonDecode(body));
+      } catch (e) {
+        print('Error decoding attendance JSON: $e\nBody: $body');
+        return null;
+      }
     } else {
-      print('Failed to fetch today\'s log: ${response.body}');
+      print(
+        'Failed to fetch today\'s log (status: ${response.statusCode}): ${response.body}',
+      );
       return null;
     }
   }

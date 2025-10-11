@@ -81,13 +81,13 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     });
 
     try {
-      // 1. Fetch Today's Attendance
+      debugPrint('Loading attendance...');
       final attendance = await _attendanceService.getTodayLog();
 
-      // 2. Fetch User's Leaves
-      final leaves = await _leaveService.getCurrentMonthLeaveByUser();
+      debugPrint('Loading leaves...');
+      final leaves = await _leaveService.getLeaveByUserSafer();
 
-      // 3. Fetch Advance Salary Requests
+      debugPrint('Loading advances...');
       final advances = await _advanceService.getAdvanceRequests();
 
       setState(() {
@@ -96,9 +96,9 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
         _userAdvances = advances;
       });
     } catch (e) {
-      // In a real app, show a snackbar or toast
       debugPrint('Error loading dashboard data: $e');
-    } finally {
+    }
+    finally {
       if (mounted) {
         setState(() {
           _isLoading = false;
