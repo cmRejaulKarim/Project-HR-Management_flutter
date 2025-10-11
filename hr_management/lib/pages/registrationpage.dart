@@ -276,9 +276,9 @@ class _RegistrationState extends State<Registration> {
                 SizedBox(height: 20.0),
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
+                    Navigator.pushNamed(
                       context,
-                      MaterialPageRoute(builder: (context) => LoginPage()),
+                      '/login',
                     );
                   },
                   child: Text(

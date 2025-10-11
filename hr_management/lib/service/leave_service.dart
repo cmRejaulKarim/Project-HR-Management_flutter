@@ -36,6 +36,19 @@ class LeaveService {
   }
 
   // get leave for employee profile
+  // Future<List<Leave>> getLeaveByUser() async {
+  //   final headers = await getAuthHeaders();
+  //   final response = await http.get(
+  //     Uri.parse('$baseUrl/byEmp'),
+  //     headers: headers,
+  //   );
+  //   if (response.statusCode == 200) {
+  //     List data = jsonDecode(response.body);
+  //     return data.map((item) => Leave.fromJson(item)).toList();
+  //   }
+  //   throw Exception('Failed to fetch Employee leave');
+  // }
+
   Future<List<Leave>> getLeaveByUser() async {
     final headers = await getAuthHeaders();
     final response = await http.get(
@@ -48,6 +61,7 @@ class LeaveService {
     }
     throw Exception('Failed to fetch Employee leave');
   }
+
 
   //get current months leave
   Future<List<Leave>> getCurrentMonthLeaveByUser() async {

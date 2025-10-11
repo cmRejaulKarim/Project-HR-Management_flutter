@@ -66,4 +66,6 @@ class Employee {
       if (basicSalary != null) 'basicSalary': basicSalary,
     };
   }
+
+  String? operator [](String other) {}
 }

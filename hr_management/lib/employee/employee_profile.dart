@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 // Assuming these imports resolve to your defined model classes
 import 'package:hr_management/entity/employee.dart';
 import 'package:hr_management/entity/advance.dart';
@@ -17,6 +18,14 @@ class EmployeeDashboard extends StatefulWidget {
   final Employee profile;
 
   const EmployeeDashboard({Key? key, required this.profile}) : super(key: key);
+
+  final String imageurl = "http://localhost:8085/images/employee/";
+
+  // final String? photo = widget.profile['photo'];
+  //
+  // final String? photoUrl = (photo != null && photo.isNotEmpty)
+  //     ? "$baseurl$photo"
+  //     : null;
 
   @override
   State<EmployeeDashboard> createState() => _EmployeeDashboardState();
@@ -37,14 +46,25 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
   List<AdvanceSalary> _userAdvances = [];
 
   // Forms Controllers
-  final TextEditingController _advanceAmountController = TextEditingController();
-  final TextEditingController _advanceReasonController = TextEditingController();
+  final TextEditingController _advanceAmountController =
+      TextEditingController();
+  final TextEditingController _advanceReasonController =
+      TextEditingController();
   final GlobalKey<FormState> _advanceFormKey = GlobalKey<FormState>();
 
   // Collapsible State (for simple toggling)
   bool _isLeaveExpanded = true;
   bool _isAdvanceExpanded = true;
 
+  // for leave form
+  bool _showLeaveForm = false;
+
+  DateTime? _leaveStartDate;
+  DateTime? _leaveEndDate;
+  int _totalLeaveDays = 0;
+  final TextEditingController _leaveReasonController = TextEditingController();
+
+  final GlobalKey<FormState> _leaveFormKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -65,7 +85,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       final attendance = await _attendanceService.getTodayLog();
 
       // 2. Fetch User's Leaves
-      final leaves = await _leaveService.getLeaveByUser();
+      final leaves = await _leaveService.getCurrentMonthLeaveByUser();
 
       // 3. Fetch Advance Salary Requests
       final advances = await _advanceService.getAdvanceRequests();
@@ -86,6 +106,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       }
     }
   }
+
 
   // --- Advance Form Visibility Logic ---
   bool get _canRequestAdvanceThisMonth {
@@ -115,7 +136,10 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     }
 
     try {
-      final success = await _advanceService.submitAdvanceRequest(amount, reason);
+      final success = await _advanceService.submitAdvanceRequest(
+        amount,
+        reason,
+      );
 
       if (success) {
         _showSnackBar('Advance request submitted successfully!');
@@ -131,9 +155,74 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     }
   }
 
+  String? get photoUrl {
+    final photo = widget.profile.photo;
+    if (photo != null && photo.isNotEmpty) {
+      return 'http://localhost:8085/images/employee/$photo';
+    }
+    return null;
+  }
+
+  void _calculateTotalLeaveDays() {
+    if (_leaveStartDate != null && _leaveEndDate != null) {
+      if (_leaveEndDate!.isAfter(_leaveStartDate!) ||
+          _leaveEndDate!.isAtSameMomentAs(_leaveStartDate!)) {
+        setState(() {
+          _totalLeaveDays =
+              _leaveEndDate!.difference(_leaveStartDate!).inDays + 1;
+        });
+      } else {
+        setState(() {
+          _totalLeaveDays = 0;
+        });
+      }
+    }
+  }
+
+  Future<void> _submitLeaveRequest() async {
+    if (!_leaveFormKey.currentState!.validate()) return;
+
+    if (_leaveStartDate == null ||
+        _leaveEndDate == null ||
+        _totalLeaveDays <= 0) {
+      _showSnackBar("Please select valid leave dates.");
+      return;
+    }
+
+    final leave = Leave(
+      startDate: _leaveStartDate!.toIso8601String().split('T')[0],
+      endDate: _leaveEndDate!.toIso8601String().split('T')[0],
+      totalLeaveDays: _totalLeaveDays,
+      reason: _leaveReasonController.text,
+      requestedDate: DateTime.now().toIso8601String().split('T')[0],
+      status: 'PENDING',
+    );
+
+    try {
+      await _leaveService.applyLeave(leave);
+      _showSnackBar("Leave request submitted.");
+      _cancelLeaveForm();
+      await _loadDashboardData(); // reload list
+    } catch (e) {
+      _showSnackBar("Error submitting leave: $e");
+    }
+  }
+
+  void _cancelLeaveForm() {
+    setState(() {
+      _showLeaveForm = false;
+      _leaveStartDate = null;
+      _leaveEndDate = null;
+      _totalLeaveDays = 0;
+      _leaveReasonController.clear();
+    });
+  }
+
   // --- Utility Widgets ---
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Widget _buildProfileCard() {
@@ -150,17 +239,22 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
               child: CircleAvatar(
                 radius: 40,
                 // Placeholder/fallback image
-                backgroundImage: widget.profile.photo != null
-                    ? NetworkImage(widget.profile.photo!)
+                backgroundImage: photoUrl != null
+                    ? NetworkImage(photoUrl!)
                     : null,
-                child: widget.profile.photo == null ? const Icon(Icons.person, size: 40) : null,
+                child: photoUrl == null
+                    ? const Icon(Icons.person, size: 40)
+                    : null,
               ),
             ),
             const SizedBox(height: 15),
             Center(
               child: Text(
                 widget.profile.name,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             Center(
@@ -170,12 +264,32 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
               ),
             ),
             const Divider(height: 30),
-            _profileRow(Icons.badge, 'Employee ID', widget.profile.id.toString()),
+            _profileRow(
+              Icons.badge,
+              'Employee ID',
+              widget.profile.id.toString(),
+            ),
             _profileRow(Icons.call, 'Phone', widget.profile.phone ?? 'N/A'),
-            _profileRow(Icons.calendar_today, 'DOB', widget.profile.dateOfBirth ?? 'N/A'),
-            _profileRow(Icons.work, 'Department ID', widget.profile.departmentId?.toString() ?? 'N/A'),
-            _profileRow(Icons.star, 'Designation ID', widget.profile.designationId?.toString() ?? 'N/A'),
-            _profileRow(Icons.calendar_month, 'Joining Date', widget.profile.joiningDate ?? 'N/A'),
+            _profileRow(
+              Icons.calendar_today,
+              'DOB',
+              widget.profile.dateOfBirth ?? 'N/A',
+            ),
+            _profileRow(
+              Icons.work,
+              'Department ID',
+              widget.profile.departmentId?.toString() ?? 'N/A',
+            ),
+            _profileRow(
+              Icons.star,
+              'Designation ID',
+              widget.profile.designationId?.toString() ?? 'N/A',
+            ),
+            _profileRow(
+              Icons.calendar_month,
+              'Joining Date',
+              widget.profile.joiningDate ?? 'N/A',
+            ),
           ],
         ),
       ),
@@ -203,28 +317,41 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ExpansionTile(
         initiallyExpanded: true,
-        title: const Text('Today\'s Attendance', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Today\'s Attendance',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         leading: const Icon(Icons.timer, color: Colors.blue),
         children: [
           _isLoading
               ? const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Center(child: CircularProgressIndicator()),
-          )
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(child: CircularProgressIndicator()),
+                )
               : Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                _profileRow(Icons.login, 'Check-In', _todayAttendance?.checkIn ?? 'N/A'),
-                _profileRow(Icons.logout, 'Check-Out', _todayAttendance?.checkOut ?? 'N/A'),
-                _profileRow(Icons.timer_10, 'Total Working Time',
-                    _todayAttendance?.totalWorkingTime != null
-                        ? '${_todayAttendance!.totalWorkingTime!.toStringAsFixed(2)} hrs'
-                        : 'N/A'
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      _profileRow(
+                        Icons.login,
+                        'Check-In',
+                        _todayAttendance?.checkIn ?? 'N/A',
+                      ),
+                      _profileRow(
+                        Icons.logout,
+                        'Check-Out',
+                        _todayAttendance?.checkOut ?? 'N/A',
+                      ),
+                      _profileRow(
+                        Icons.timer_10,
+                        'Total Working Time',
+                        _todayAttendance?.totalWorkingTime != null
+                            ? '${_todayAttendance!.totalWorkingTime!.toStringAsFixed(2)} hrs'
+                            : 'N/A',
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -236,52 +363,213 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ExpansionTile(
-        title: const Text('Leave History', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Leave History',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         leading: const Icon(Icons.date_range, color: Colors.green),
         initiallyExpanded: _isLeaveExpanded,
-        onExpansionChanged: (isExpanded) => setState(() => _isLeaveExpanded = isExpanded),
+        onExpansionChanged: (isExpanded) =>
+            setState(() => _isLeaveExpanded = isExpanded),
         children: [
           _isLoading
               ? const Center(child: LinearProgressIndicator())
               : _userLeaves.isEmpty
               ? const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text('No leave requests found.'),
-          )
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('No leave requests found.'),
+                )
               : ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _userLeaves.length > 5 ? 5 : _userLeaves.length, // Show top 5
-            itemBuilder: (context, index) {
-              final leave = _userLeaves[index];
-              Color statusColor = leave.status == 'APPROVED' ? Colors.green : (leave.status == 'REJECTED' ? Colors.red : Colors.orange);
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _userLeaves.length > 5 ? 5 : _userLeaves.length,
+                  // Show top 5
+                  itemBuilder: (context, index) {
+                    final leave = _userLeaves[index];
+                    Color statusColor = leave.status == 'APPROVED'
+                        ? Colors.green
+                        : (leave.status == 'REJECTED'
+                              ? Colors.red
+                              : Colors.orange);
 
-              return ListTile(
-                title: Text('${leave.startDate} to ${leave.endDate} (${leave.totalLeaveDays} days)'),
-                subtitle: Text(leave.reason),
-                trailing: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Text(
-                    leave.status,
-                    style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 12),
-                  ),
+                    return ListTile(
+                      title: Text(
+                        '${leave.startDate} to ${leave.endDate} (${leave.totalLeaveDays} days)',
+                      ),
+                      subtitle: Text(leave.reason),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(
+                          leave.status,
+                          style: TextStyle(
+                            color: statusColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
           if (_userLeaves.length > 5)
             TextButton(
               onPressed: () {
                 // Navigate to full leave history page
-                _showSnackBar('Showing all ${(_userLeaves.length)} leave requests...');
+                _showSnackBar(
+                  'Showing all ${(_userLeaves.length)} leave requests...',
+                );
               },
               child: const Text('View All Leaves'),
-            )
+            ),
         ],
+      ),
+    );
+  }
+
+  //leave form
+
+  Widget _buildLeaveRequestForm() {
+    if (!_showLeaveForm) return const SizedBox.shrink();
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _leaveFormKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Leave Request",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // From Date
+              Text("From Date"),
+              InkWell(
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _leaveStartDate ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _leaveStartDate = picked;
+                      _calculateTotalLeaveDays();
+                    });
+                  }
+                },
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  child: Text(
+                    _leaveStartDate != null
+                        ? _leaveStartDate!.toLocal().toString().split(' ')[0]
+                        : 'Select date',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // To Date
+              Text("To Date"),
+              InkWell(
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _leaveEndDate ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _leaveEndDate = picked;
+                      _calculateTotalLeaveDays();
+                    });
+                  }
+                },
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  child: Text(
+                    _leaveEndDate != null
+                        ? _leaveEndDate!.toLocal().toString().split(' ')[0]
+                        : 'Select date',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // Total Leave Days
+              TextFormField(
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'Total Leave Days',
+                  border: OutlineInputBorder(),
+                ),
+                initialValue: _totalLeaveDays.toString(),
+                key: ValueKey(_totalLeaveDays), // To rebuild when days change
+              ),
+              const SizedBox(height: 15),
+
+              // Reason
+              TextFormField(
+                controller: _leaveReasonController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Reason',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? 'Please enter a reason.'
+                    : null,
+              ),
+              const SizedBox(height: 20),
+
+              // Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _submitLeaveRequest,
+                    icon: const Icon(Icons.send),
+                    label: const Text('Submit'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton.icon(
+                    onPressed: _cancelLeaveForm,
+                    icon: const Icon(Icons.cancel),
+                    label: const Text('Cancel'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -292,44 +580,61 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ExpansionTile(
-        title: const Text('Advance Salary Requests', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Advance Salary Requests',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         leading: const Icon(Icons.money, color: Colors.orange),
         initiallyExpanded: _isAdvanceExpanded,
-        onExpansionChanged: (isExpanded) => setState(() => _isAdvanceExpanded = isExpanded),
+        onExpansionChanged: (isExpanded) =>
+            setState(() => _isAdvanceExpanded = isExpanded),
         children: [
           _isLoading
               ? const Center(child: LinearProgressIndicator())
               : _userAdvances.isEmpty
               ? const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text('No advance salary requests found.'),
-          )
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('No advance salary requests found.'),
+                )
               : ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _userAdvances.length,
-            itemBuilder: (context, index) {
-              final advance = _userAdvances[index];
-              Color statusColor = advance.status == 'APPROVED' ? Colors.green : (advance.status == 'REJECTED' ? Colors.red : Colors.orange);
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _userAdvances.length,
+                  itemBuilder: (context, index) {
+                    final advance = _userAdvances[index];
+                    Color statusColor = advance.status == 'APPROVED'
+                        ? Colors.green
+                        : (advance.status == 'REJECTED'
+                              ? Colors.red
+                              : Colors.orange);
 
-              return ListTile(
-                leading: Icon(Icons.attach_money, color: statusColor),
-                title: Text('\$${advance.amount.toStringAsFixed(2)}'),
-                subtitle: Text('Requested: ${advance.requestDate}\nReason: ${advance.reason ?? 'N/A'}'),
-                trailing: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Text(
-                    advance.status,
-                    style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 12),
-                  ),
+                    return ListTile(
+                      leading: Icon(Icons.attach_money, color: statusColor),
+                      title: Text('\$${advance.amount.toStringAsFixed(2)}'),
+                      subtitle: Text(
+                        'Requested: ${advance.requestDate}\nReason: ${advance.reason ?? 'N/A'}',
+                      ),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(
+                          advance.status,
+                          style: TextStyle(
+                            color: statusColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ],
       ),
     );
@@ -344,7 +649,9 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
         child: const ListTile(
           leading: Icon(Icons.info, color: Colors.blue),
           title: Text('Advance Request Status'),
-          subtitle: Text('You have already submitted an advance request this month. Please wait for approval or the next month.'),
+          subtitle: Text(
+            'You have already submitted an advance request this month. Please wait for approval or the next month.',
+          ),
         ),
       );
     }
@@ -354,7 +661,10 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ExpansionTile(
-        title: const Text('Request New Advance Salary', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+        title: const Text(
+          'Request New Advance Salary',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+        ),
         leading: const Icon(Icons.add_task, color: Colors.red),
         children: [
           Padding(
@@ -372,7 +682,9 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                       prefixIcon: Icon(Icons.payments),
                     ),
                     validator: (value) {
-                      if (value == null || double.tryParse(value) == null || double.parse(value) <= 0) {
+                      if (value == null ||
+                          double.tryParse(value) == null ||
+                          double.parse(value) <= 0) {
                         return 'Please enter a valid amount.';
                       }
                       return null;
@@ -403,7 +715,9 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
                 ],
@@ -414,10 +728,37 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       ),
     );
   }
+  Widget _buildLeaveRequestTriggerButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ElevatedButton.icon(
+        onPressed: () {
+          setState(() {
+            _showLeaveForm = true;
+          });
+        },
+        icon: const Icon(Icons.add),
+        label: const Text("Request Leave"),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+          minimumSize: const Size(double.infinity, 50),
+        ),
+      ),
+    );
+  }
+
 
   // --- Main Build Method ---
   @override
   Widget build(BuildContext context) {
+    final String baseurl = "http://localhost:8085/images/employee/";
+    final String? photo = widget.profile.photo;
+
+    final String? photoUrl = (photo != null && photo.isNotEmpty)
+        ? "$baseurl$photo"
+        : null;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Employee Dashboard'),
@@ -427,7 +768,9 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await _authService.logout();
-              Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/', (route) => false);
             },
           ),
         ],
@@ -435,18 +778,20 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildProfileCard(),
-            _buildAttendanceCard(),
-            _buildLeaveHistory(),
-            _buildAdvanceRequests(),
-            _buildAdvanceRequestForm(), // Visibility handled internally
-          ],
-        ),
-      ),
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildProfileCard(),
+                  _buildAttendanceCard(),
+                  _buildLeaveHistory(),
+                  _buildLeaveRequestTriggerButton(),
+                  _buildLeaveRequestForm(),
+                  _buildAdvanceRequests(),
+                  _buildAdvanceRequestForm(), // Visibility handled internally
+                ],
+              ),
+            ),
     );
   }
 }
