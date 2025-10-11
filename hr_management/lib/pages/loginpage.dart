@@ -13,6 +13,7 @@ class LoginPage extends StatelessWidget {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
 
+  // Note: storage is declared but not used in the provided methods
   final storage = new FlutterSecureStorage();
   AuthService authService = AuthService();
   EmployeeService employeeService = EmployeeService();
@@ -57,13 +58,13 @@ class LoginPage extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w800,
-                  color: Colors.black,
+                  color: Colors.white, // Changed to white for better contrast
                 ),
               ),
 
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,
-                foregroundColor: Colors.grey,
+                // Removed deprecated 'foregroundColor: Colors.grey,' property
               ),
             ),
 
@@ -130,12 +131,14 @@ class LoginPage extends StatelessWidget {
           MaterialPageRoute(builder: (context) => DeptHeadDash()),
         );
       } else if (role == 'EMPLOYEE') {
+        // profile is now correctly of type Employee?
         final profile = await employeeService.getEmployeeProfile();
 
         if (profile != null) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
+              // No type error here, as profile is Employee
               builder: (context) => EmployeeDashboard(profile: profile),
             ),
           );
