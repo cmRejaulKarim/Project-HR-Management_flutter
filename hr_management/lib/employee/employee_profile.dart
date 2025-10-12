@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hr_management/entity/department.dart';
+import 'package:hr_management/entity/designation.dart';
 
 // Assuming these imports resolve to your defined model classes
 import 'package:hr_management/entity/employee.dart';
@@ -8,6 +10,8 @@ import 'package:hr_management/entity/leave.dart';
 
 // Assuming these imports resolve to your defined service classes
 import 'package:hr_management/service/authservice.dart';
+import 'package:hr_management/service/department_service.dart';
+import 'package:hr_management/service/designation_service.dart';
 import 'package:hr_management/service/employee_service.dart';
 import 'package:hr_management/service/attendance_service.dart';
 import 'package:hr_management/service/leave_service.dart';
@@ -21,12 +25,6 @@ class EmployeeDashboard extends StatefulWidget {
 
   final String imageurl = "http://localhost:8085/images/employee/";
 
-  // final String? photo = widget.profile['photo'];
-  //
-  // final String? photoUrl = (photo != null && photo.isNotEmpty)
-  //     ? "$baseurl$photo"
-  //     : null;
-
   @override
   State<EmployeeDashboard> createState() => _EmployeeDashboardState();
 }
@@ -38,12 +36,17 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
   final AttendanceService _attendanceService = AttendanceService();
   final LeaveService _leaveService = LeaveService();
   final AdvanceService _advanceService = AdvanceService();
+  final DepartmentService _departmentService = DepartmentService();
+  final DesignationService _designationService = DesignationService();
 
   // --- State Variables ---
   bool _isLoading = true;
   Attendance? _todayAttendance;
   List<Leave> _userLeaves = [];
   List<AdvanceSalary> _userAdvances = [];
+  String _departmentName = 'N/A';
+  String _designationName = 'N/A';
+
 
   // Forms Controllers
   final TextEditingController _advanceAmountController =
@@ -52,18 +55,11 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       TextEditingController();
   final GlobalKey<FormState> _advanceFormKey = GlobalKey<FormState>();
 
-  // Collapsible State (for simple toggling)
-  bool _isLeaveExpanded = true;
-  bool _isAdvanceExpanded = true;
-
-  // for leave form
-  bool _showLeaveForm = false;
-
+  // for leave form (controllers are still needed for the dialog state)
   DateTime? _leaveStartDate;
   DateTime? _leaveEndDate;
   int _totalLeaveDays = 0;
   final TextEditingController _leaveReasonController = TextEditingController();
-
   final GlobalKey<FormState> _leaveFormKey = GlobalKey<FormState>();
 
   @override
@@ -85,10 +81,29 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       final attendance = await _attendanceService.getTodayLog();
 
       debugPrint('Loading leaves...');
-      final leaves = await _leaveService.getLeaveByUserSafer();
+      final leaves = await _leaveService.getCurrentMonthLeaveByUser();
 
       debugPrint('Loading advances...');
       final advances = await _advanceService.getAdvanceRequests();
+
+      if (widget.profile.departmentId != null) {
+        final allDepts = await _departmentService.getAllDepartments();
+        final dept = allDepts?.firstWhere(
+              (d) => d.id == widget.profile.departmentId,
+          orElse: () => Department(id: -1, name: 'Unknown Department'),
+        );
+        _departmentName = dept?.name ?? 'N/A';
+
+        // Fetch designations for the specific department to get the name
+        if (widget.profile.designationId != null) {
+          final desgs = await _designationService.getAllDesignations();
+          final desg = desgs!.firstWhere(
+                (d) => d.id == widget.profile.designationId,
+            orElse: () => Designation(id: -1, name: 'Unknown Designation'),
+          );
+          _designationName = desg.name;
+        }
+      }
 
       setState(() {
         _todayAttendance = attendance;
@@ -106,7 +121,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     }
   }
 
-  // --- Advance Form Visibility Logic ---
+  // --- Advance Form Eligibility Logic ---
   bool get _canRequestAdvanceThisMonth {
     final now = DateTime.now();
     // Check if any advance request exists for the current month and year
@@ -115,13 +130,12 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
         final requestDate = DateTime.parse(advance.requestDate);
         return requestDate.year == now.year && requestDate.month == now.month;
       } catch (_) {
-        // Handle invalid date format by assuming it doesn't match
         return false;
       }
     });
   }
 
-  // --- Advance Form Submission ---
+  // --- Advance Form Submission (Called from Dialog) ---
   Future<void> _submitAdvanceRequest() async {
     if (!_advanceFormKey.currentState!.validate()) return;
 
@@ -140,10 +154,12 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       );
 
       if (success) {
+        // Dismiss dialog
+        if (mounted) Navigator.of(context).pop();
+
         _showSnackBar('Advance request submitted successfully!');
         _advanceAmountController.clear();
         _advanceReasonController.clear();
-        // Reload data to update the advance request list and visibility
         await _loadDashboardData();
       } else {
         _showSnackBar('Failed to submit advance request. Please try again.');
@@ -153,15 +169,10 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     }
   }
 
-  String? get photoUrl {
-    final photo = widget.profile.photo;
-    if (photo != null && photo.isNotEmpty) {
-      return 'http://localhost:8085/images/employee/$photo';
-    }
-    return null;
-  }
+  // --- Leave Logic (Called from Dialog) ---
 
   void _calculateTotalLeaveDays() {
+    // Force a re-render of the dialog content to update the days count
     if (_leaveStartDate != null && _leaveEndDate != null) {
       if (_leaveEndDate!.isAfter(_leaveStartDate!) ||
           _leaveEndDate!.isAtSameMomentAs(_leaveStartDate!)) {
@@ -198,30 +209,55 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
 
     try {
       await _leaveService.applyLeave(leave);
+
+      // Dismiss dialog
+      if (mounted) Navigator.of(context).pop();
+
       _showSnackBar("Leave request submitted.");
-      _cancelLeaveForm();
+      // Reset local state after successful submission
+      _leaveStartDate = null;
+      _leaveEndDate = null;
+      _totalLeaveDays = 0;
+      _leaveReasonController.clear();
+
       await _loadDashboardData(); // reload list
     } catch (e) {
       _showSnackBar("Error submitting leave: $e");
     }
   }
 
-  void _cancelLeaveForm() {
-    setState(() {
-      _showLeaveForm = false;
-      _leaveStartDate = null;
-      _leaveEndDate = null;
-      _totalLeaveDays = 0;
-      _leaveReasonController.clear();
-    });
+  // --- Utility Widgets and Functions ---
+
+  String? get photoUrl {
+    final photo = widget.profile.photo;
+    if (photo != null && photo.isNotEmpty) {
+      return 'http://localhost:8085/images/employee/$photo';
+    }
+    return null;
   }
 
-  // --- Utility Widgets ---
   void _showSnackBar(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
+
+  Widget _profileRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.purple),
+          const SizedBox(width: 10),
+          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(child: Text(value)),
+        ],
+      ),
+    );
+  }
+
+  // --- Core UI Widgets ---
 
   Widget _buildProfileCard() {
     return Card(
@@ -236,7 +272,6 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
             Center(
               child: CircleAvatar(
                 radius: 40,
-                // Placeholder/fallback image
                 backgroundImage: photoUrl != null
                     ? NetworkImage(photoUrl!)
                     : null,
@@ -262,11 +297,6 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
               ),
             ),
             const Divider(height: 30),
-            _profileRow(
-              Icons.badge,
-              'Employee ID',
-              widget.profile.id.toString(),
-            ),
             _profileRow(Icons.call, 'Phone', widget.profile.phone ?? 'N/A'),
             _profileRow(
               Icons.calendar_today,
@@ -275,13 +305,13 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
             ),
             _profileRow(
               Icons.work,
-              'Department ID',
-              widget.profile.departmentId?.toString() ?? 'N/A',
+              'Department', // Changed label
+              _departmentName, // Use the fetched name
             ),
             _profileRow(
               Icons.star,
-              'Designation ID',
-              widget.profile.designationId?.toString() ?? 'N/A',
+              'Designation', // Changed label
+              _designationName, // Use the fetched name
             ),
             _profileRow(
               Icons.calendar_month,
@@ -293,8 +323,10 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       ),
     );
   }
+  // Attendance Card
 
-  Widget _profileRow(IconData icon, String label, String value) {
+// New helper function to build the Check-In/Check-Out rows with colored text
+  Widget _buildStyledAttendanceRow(IconData icon, String label, String value, {TextStyle? statusStyle}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -302,74 +334,166 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
           Icon(icon, size: 20, color: Colors.purple),
           const SizedBox(width: 10),
           Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value)),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                text: value,
+                style: TextStyle(color: Colors.black, fontSize: 14), // Default style
+                children: [
+                  if (statusStyle != null)
+                    TextSpan(
+                      text: value.contains('(Late)') ? ' (Late)' : (value.contains('Absent') ? ' Absent' : ''),
+                      style: statusStyle,
+                    ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildAttendanceCard() {
+    // Determine status strings
+    final bool isLate = (_todayAttendance?.lateCount ?? 0) > 0;
+    final bool isAbsent = _todayAttendance?.absent == true;
+
+    // Base values
+    final String checkInTime = _todayAttendance?.checkIn ?? 'N/A';
+    final String checkOutTime = _todayAttendance?.checkOut ?? 'N/A';
+
+    // Define colored text styles
+    const TextStyle lateStyle = TextStyle(color: Colors.red, fontWeight: FontWeight.bold);
+    const TextStyle absentStyle = TextStyle(color: Colors.red, fontWeight: FontWeight.bold);
+    const TextStyle normalValueStyle = TextStyle(color: Colors.black, fontSize: 14);
+
+
+    // Attendance Card - Non-Collapsible
     return Card(
       elevation: 4,
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: ExpansionTile(
-        initiallyExpanded: true,
-        title: const Text(
-          'Today\'s Attendance',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        leading: const Icon(Icons.timer, color: Colors.blue),
-        children: [
-          _isLoading
-              ? const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.timer, color: Colors.blue),
+                SizedBox(width: 8),
+                Text(
+                  'Today\'s Attendance',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ],
+            ),
+            const Divider(),
+            _isLoading
+                ? const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0),
+              child: Center(child: CircularProgressIndicator()),
+            )
+                : Column(
+              children: [
+                // --- Check-In (with colored Late status) ---
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Row(
                     children: [
-                      _profileRow(
-                        Icons.login,
-                        'Check-In',
-                        _todayAttendance?.checkIn ?? 'N/A',
-                      ),
-                      _profileRow(
-                        Icons.logout,
-                        'Check-Out',
-                        _todayAttendance?.checkOut ?? 'N/A',
-                      ),
-                      _profileRow(
-                        Icons.timer_10,
-                        'Total Working Time',
-                        _todayAttendance?.totalWorkingTime != null
-                            ? '${_todayAttendance!.totalWorkingTime!.toStringAsFixed(2)} hrs'
-                            : 'N/A',
+                      const Icon(Icons.login, size: 20, color: Colors.purple),
+                      const SizedBox(width: 10),
+                      const Text('Check-In: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            text: checkInTime,
+                            style: normalValueStyle,
+                            children: [
+                              if (isLate)
+                                const TextSpan(
+                                  text: ' (Late)',
+                                  style: lateStyle,
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-        ],
+
+                // --- Check-Out (with colored Absent status) ---
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.logout, size: 20, color: Colors.purple),
+                      const SizedBox(width: 10),
+                      const Text('Check-Out: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            text: checkOutTime,
+                            style: normalValueStyle,
+                            children: [
+                              if (isAbsent)
+                                const TextSpan(
+                                  text: '  Absent',
+                                  style: absentStyle,
+                                )
+                              else if (checkOutTime == 'N/A')
+                                TextSpan(
+                                  text: ' (Pending)',
+                                  style: TextStyle(color: Colors.grey[600]),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _profileRow(
+                  Icons.timer_10,
+                  'Total Working Time',
+                  _todayAttendance?.totalWorkingTime != null
+                      ? '${_todayAttendance!.totalWorkingTime!.toStringAsFixed(2)} hrs'
+                      : 'N/A',
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
+
   Widget _buildLeaveHistory() {
+    // Leave History - Non-Collapsible Card (CHANGE)
     return Card(
       elevation: 4,
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: ExpansionTile(
-        title: const Text(
-          'Leave History',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        leading: const Icon(Icons.date_range, color: Colors.green),
-        initiallyExpanded: _isLeaveExpanded,
-        onExpansionChanged: (isExpanded) =>
-            setState(() => _isLeaveExpanded = isExpanded),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 8),
+            child: Row(
+              children: [
+                Icon(Icons.date_range, color: Colors.green),
+                SizedBox(width: 8),
+                Text(
+                  'Leave History',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 0),
           _isLoading
               ? const Center(child: LinearProgressIndicator())
               : _userLeaves.isEmpty
@@ -417,183 +541,76 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                   },
                 ),
           if (_userLeaves.length > 5)
-            TextButton(
-              onPressed: () {
-                // Navigate to full leave history page
-                _showSnackBar(
-                  'Showing all ${(_userLeaves.length)} leave requests...',
-                );
-              },
-              child: const Text('View All Leaves'),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: TextButton(
+                onPressed: () {
+                  _showSnackBar(
+                    'Showing all ${(_userLeaves.length)} leave requests...',
+                  );
+                },
+                child: const Text('View All Leaves'),
+              ),
             ),
         ],
       ),
     );
   }
 
-  //leave form
-
-  Widget _buildLeaveRequestForm() {
-    if (!_showLeaveForm) return const SizedBox.shrink();
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _leaveFormKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Leave Request",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                ),
-              ),
-              const SizedBox(height: 15),
-
-              // From Date
-              Text("From Date"),
-              InkWell(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _leaveStartDate ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) {
-                    setState(() {
-                      _leaveStartDate = picked;
-                      _calculateTotalLeaveDays();
-                    });
-                  }
-                },
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                  child: Text(
-                    _leaveStartDate != null
-                        ? _leaveStartDate!.toLocal().toString().split(' ')[0]
-                        : 'Select date',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-
-              // To Date
-              Text("To Date"),
-              InkWell(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _leaveEndDate ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) {
-                    setState(() {
-                      _leaveEndDate = picked;
-                      _calculateTotalLeaveDays();
-                    });
-                  }
-                },
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                  child: Text(
-                    _leaveEndDate != null
-                        ? _leaveEndDate!.toLocal().toString().split(' ')[0]
-                        : 'Select date',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-
-              // Total Leave Days
-              TextFormField(
-                readOnly: true,
-                decoration: const InputDecoration(
-                  labelText: 'Total Leave Days',
-                  border: OutlineInputBorder(),
-                ),
-                initialValue: _totalLeaveDays.toString(),
-                key: ValueKey(_totalLeaveDays), // To rebuild when days change
-              ),
-              const SizedBox(height: 15),
-
-              // Reason
-              TextFormField(
-                controller: _leaveReasonController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Reason',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) => (value == null || value.trim().isEmpty)
-                    ? 'Please enter a reason.'
-                    : null,
-              ),
-              const SizedBox(height: 20),
-
-              // Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _submitLeaveRequest,
-                    icon: const Icon(Icons.send),
-                    label: const Text('Submit'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton.icon(
-                    onPressed: _cancelLeaveForm,
-                    icon: const Icon(Icons.cancel),
-                    label: const Text('Cancel'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAdvanceRequests() {
+  Widget _buildAdvanceRequestsHistory() {
+    // Advance Requests History - Non-Collapsible Card (CHANGE)
     return Card(
       elevation: 4,
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: ExpansionTile(
-        title: const Text(
-          'Advance Salary Requests',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        leading: const Icon(Icons.money, color: Colors.orange),
-        initiallyExpanded: _isAdvanceExpanded,
-        onExpansionChanged: (isExpanded) =>
-            setState(() => _isAdvanceExpanded = isExpanded),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 8),
+            child: Row(
+              children: [
+                Icon(Icons.money, color: Colors.orange),
+                SizedBox(width: 8),
+                Text(
+                  'Advance Salary Requests History',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 0),
           _isLoading
               ? const Center(child: LinearProgressIndicator())
               : _userAdvances.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('No advance salary requests found.'),
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: ElevatedButton.icon(
+                    onPressed: _showAdvanceRequestDialog,
+                    icon: const Icon(Icons.add),
+                    label: const Text("Request New Advance Salary"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                  ),
                 )
+              //
+              // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              // child: ElevatedButton.icon(
+              // onPressed: _showAdvanceRequestDialog, // Trigger Dialog with eligibility check
+              // icon: const Icon(Icons.money),
+              // label: const Text("Request Advance Salary"),
+              // style: ElevatedButton.styleFrom(
+              // backgroundColor: Colors.red,
+              // foregroundColor: Colors.white,
+              // minimumSize: const Size(double.infinity, 50),
+              // ),
+              // ),
               : ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -638,38 +655,184 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     );
   }
 
-  Widget _buildAdvanceRequestForm() {
-    if (!_canRequestAdvanceThisMonth) {
-      return Card(
-        color: Colors.lightBlue.shade50,
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: const ListTile(
-          leading: Icon(Icons.info, color: Colors.blue),
-          title: Text('Advance Request Status'),
-          subtitle: Text(
-            'You have already submitted an advance request this month. Please wait for approval or the next month.',
+  // --- Dialog Forms ---
+
+  Widget _buildLeaveRequestFormDialog(StateSetter dialogSetState) {
+    return SingleChildScrollView(
+      child: AlertDialog(
+        title: const Text("Request Leave"),
+        content: Form(
+          key: _leaveFormKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // From Date
+              const Text("From Date"),
+              InkWell(
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _leaveStartDate ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) {
+                    dialogSetState(() {
+                      _leaveStartDate = picked;
+                      // Call main state method to update total days
+                      _calculateTotalLeaveDays();
+                    });
+                  }
+                },
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  child: Text(
+                    _leaveStartDate != null
+                        ? _leaveStartDate!.toLocal().toString().split(' ')[0]
+                        : 'Select date',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // To Date
+              const Text("To Date"),
+              InkWell(
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _leaveEndDate ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) {
+                    dialogSetState(() {
+                      _leaveEndDate = picked;
+                      // Call main state method to update total days
+                      _calculateTotalLeaveDays();
+                    });
+                  }
+                },
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  child: Text(
+                    _leaveEndDate != null
+                        ? _leaveEndDate!.toLocal().toString().split(' ')[0]
+                        : 'Select date',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // Total Leave Days - Use the main state's value
+              TextFormField(
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'Total Leave Days',
+                  border: OutlineInputBorder(),
+                ),
+                initialValue: _totalLeaveDays.toString(),
+                key: ValueKey('LeaveDays$_totalLeaveDays'), // Key for rebuild
+              ),
+              const SizedBox(height: 15),
+
+              // Reason
+              TextFormField(
+                controller: _leaveReasonController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Reason',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? 'Please enter a reason.'
+                    : null,
+              ),
+            ],
           ),
         ),
-      );
-    }
+        actions: [
+          TextButton(
+            onPressed: () {
+              // Reset local state variables before closing
+              setState(() {
+                _leaveStartDate = null;
+                _leaveEndDate = null;
+                _totalLeaveDays = 0;
+                _leaveReasonController.clear();
+              });
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: _submitLeaveRequest,
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
+  }
 
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: ExpansionTile(
-        title: const Text(
-          'Request New Advance Salary',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-        ),
-        leading: const Icon(Icons.add_task, color: Colors.red),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
+  void _showLeaveRequestDialog() {
+    // Reset form state before opening dialog
+    _leaveStartDate = null;
+    _leaveEndDate = null;
+    _totalLeaveDays = 0;
+    _leaveReasonController.clear();
+    _leaveFormKey.currentState?.reset();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        // Use a StatefulBuilder to allow the dialog content (dates/days) to update
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter dialogSetState) {
+            return _buildLeaveRequestFormDialog(dialogSetState);
+          },
+        );
+      },
+    );
+  }
+
+  void _showAdvanceRequestDialog() {
+    // Reset form state before opening dialog
+    _advanceAmountController.clear();
+    _advanceReasonController.clear();
+    _advanceFormKey.currentState?.reset();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // Check eligibility right before building the dialog content
+        if (!_canRequestAdvanceThisMonth) {
+          return AlertDialog(
+            title: const Text('Advance Request Not Allowed'),
+            content: const Text(
+              'You have already submitted an advance request this month. Please wait for the next month.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        }
+
+        // If eligible, show the form
+        return SingleChildScrollView(
+          child: AlertDialog(
+            title: const Text("Request New Advance Salary"),
+            content: Form(
               key: _advanceFormKey,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   TextFormField(
                     controller: _advanceAmountController,
@@ -704,46 +867,22 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    onPressed: _submitAdvanceRequest,
-                    icon: const Icon(Icons.send),
-                    label: const Text('Submit Request'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: _submitAdvanceRequest,
+                child: const Text('Submit Request'),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLeaveRequestTriggerButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ElevatedButton.icon(
-        onPressed: () {
-          setState(() {
-            _showLeaveForm = true;
-          });
-        },
-        icon: const Icon(Icons.add),
-        label: const Text("Request Leave"),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
-          minimumSize: const Size(double.infinity, 50),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -756,12 +895,16 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
         backgroundColor: Colors.purple,
         actions: [
           IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadDashboardData, // Call the existing data fetching method
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await _authService.logout();
               Navigator.of(
                 context,
-              ).pushNamedAndRemoveUntil('/', (route) => false);
+              ).pushNamedAndRemoveUntil('/login', (route) => false);
             },
           ),
         ],
@@ -775,11 +918,24 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                 children: [
                   _buildProfileCard(),
                   _buildAttendanceCard(),
-                  _buildLeaveHistory(),
-                  _buildLeaveRequestTriggerButton(),
-                  _buildLeaveRequestForm(),
-                  _buildAdvanceRequests(),
-                  _buildAdvanceRequestForm(), // Visibility handled internally
+                  _buildLeaveHistory(), // Non-Collapsible History
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: _showLeaveRequestDialog, // Trigger Dialog
+                      icon: const Icon(Icons.add),
+                      label: const Text("Request Leave"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                    ),
+                  ),
+                  _buildAdvanceRequestsHistory(), // Non-Collapsible History
                 ],
               ),
             ),
