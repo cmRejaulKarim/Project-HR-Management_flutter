@@ -198,6 +198,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     }
 
     final leave = Leave(
+      employee: widget.profile.id,
       startDate: _leaveStartDate!.toIso8601String().split('T')[0],
       endDate: _leaveEndDate!.toIso8601String().split('T')[0],
       totalLeaveDays: _totalLeaveDays,

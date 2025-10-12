@@ -70,10 +70,7 @@ class LoginPage extends StatelessWidget {
             SizedBox(height: 20.0),
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  '/registration'
-                );
+                Navigator.pushNamed(context, '/registration');
               },
               child: Text(
                 'Registration',
@@ -94,29 +91,35 @@ class LoginPage extends StatelessWidget {
       final response = await authService.login(email.text, password.text);
 
       print(response);
-
+      // profile is now correctly of type Employee?
+      final profile = await employeeService.getEmployeeProfile();
       final role = await authService.getUserRole();
       print(role);
 
       if (role == 'ADMIN') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => AdminDashboard(role: role!)),
+          MaterialPageRoute(
+            builder: (context) =>
+                AdminDashboard(role: role!, profile: profile!),
+          ),
         );
       } else if (role == 'ACCOUNTANT') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => AccountantDash(role: role!)),
+          MaterialPageRoute(
+            builder: (context) =>
+                AccountantDash(role: role!, profile: profile!),
+          ),
         );
       } else if (role == 'DEPARTMENT_HEAD') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DeptHeadDashboard()),
+          MaterialPageRoute(
+            builder: (context) => DeptHeadDashboard(role: role!, profile: profile!),
+          ),
         );
       } else if (role == 'EMPLOYEE') {
-        // profile is now correctly of type Employee?
-        final profile = await employeeService.getEmployeeProfile();
-
         if (profile != null) {
           Navigator.pushReplacement(
             context,

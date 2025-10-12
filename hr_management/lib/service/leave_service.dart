@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class LeaveService {
-  final String baseUrl = "http://localhost:8085/api/leave";
+  final String baseUrl = "http://localhost:8085/api/leavebyDept";
 
   // for Auth header and token
   Future<Map<String, String>> getAuthHeaders() async {
@@ -146,7 +146,7 @@ class LeaveService {
   Future<List<Leave>> getLeavesByDept() async {
     final headers = await getAuthHeaders();
     final response = await http.get(
-      Uri.parse('${baseUrl}byDept'),
+      Uri.parse('${baseUrl}/byDept'),
       headers: headers,
     );
     if (response.statusCode == 200) {
@@ -160,7 +160,7 @@ class LeaveService {
   Future<List<Leave>> getDeptHeadLeaves() async {
     final headers = await getAuthHeaders();
     final response = await http.get(
-      Uri.parse('${baseUrl}ofDeptHeads'),
+      Uri.parse('${baseUrl}/ofDeptHeads'),
       headers: headers,
     );
     if (response.statusCode == 200) {
@@ -212,7 +212,7 @@ class LeaveService {
   Future<List<Leave>> getAllLeaves() async {
     final headers = await getAuthHeaders();
     final response = await http.get(
-      Uri.parse('${baseUrl}all'),
+      Uri.parse('${baseUrl}/all'),
       headers: headers,
     );
     if (response.statusCode == 200) {
@@ -226,7 +226,7 @@ class LeaveService {
   Future<int> getYearlyApprovedLeaveDays(int empId, int year) async {
     final headers = await getAuthHeaders();
     final response = await http.get(
-      Uri.parse('${baseUrl}approved/yearly?empId=$empId&year=$year'),
+      Uri.parse('${baseUrl}/approved/yearly?empId=$empId&year=$year'),
       headers: headers,
     );
     if (response.statusCode == 200) {

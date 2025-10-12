@@ -1,140 +1,205 @@
 import 'package:flutter/material.dart';
+import 'package:hr_management/entity/department.dart';
+import 'package:hr_management/entity/employee.dart';
+import 'package:hr_management/entity/leave.dart';
 import 'package:hr_management/pages/loginpage.dart';
+import 'package:hr_management/pages/sidebar.dart';
 import 'package:hr_management/service/authservice.dart';
+import 'package:hr_management/service/department_service.dart';
+import 'package:hr_management/service/leave_service.dart';
 
-class DeptHeadDashboard extends StatelessWidget {
-  const DeptHeadDashboard({super.key});
+class DeptHeadDashboard extends StatefulWidget {
+  final String role;
+  final Employee profile;
 
-  @override
-  Widget build(BuildContext context) {
-    final AuthService _authService = AuthService();
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dept Head Dashboard'),
-        backgroundColor: const Color(0xFF81817D),
-        foregroundColor: Colors.blue,
-        elevation: 1,
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
-              child: Text(
-                'Menu',
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Home'),
-              onTap: () {
-                Navigator.pushNamed(context, '/empprofile');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.assignment),
-              title: const Text('View All Attendance'),
-              onTap: () {
-                Navigator.pushNamed(context, '/attendancebydept');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.time_to_leave_outlined),
-              title: const Text('Leave Requests'),
-              onTap: () {
-                Navigator.pushNamed(context, '/leave');
-              },
-            ),
-            const Divider(
-              color: Colors.grey,
-              thickness: 1,
-              indent: 16,
-              endIndent: 16,
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: Text('Logout'),
-              onTap: () async {
-                await _authService.logout();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.count(
-          crossAxisCount: 1,
-          // Use 2 for side-by-side on tablets
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 2.5,
-          children: const [
-            DashboardCard(
-              title: 'Upcoming Holidays',
-              content: [''],
-              icon: Icons.calendar_today,
-            ),
-            DashboardCard(
-              title: 'Employee Attendance',
-              content: [''],
-              icon: Icons.people,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class DashboardCard extends StatelessWidget {
-  final String title;
-  final List<String> content;
-  final IconData icon;
-
-  const DashboardCard({
+  const DeptHeadDashboard({
     super.key,
-    required this.title,
-    required this.content,
-    required this.icon,
+    required this.role,
+    required this.profile,
   });
 
   @override
+  State<DeptHeadDashboard> createState() => _DeptHeadDashboardState();
+}
+
+class _DeptHeadDashboardState extends State<DeptHeadDashboard> {
+  late Future<List<Leave>> _leavesFuture;
+  final LeaveService _leaveService = LeaveService();
+  final AuthService _authService = AuthService();
+  final DepartmentService _departmentService = DepartmentService();
+
+  String? _departmentName;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _leavesFuture = _leaveService.getLeavesByDept();
+    _fetchDepartmentName();
+  }
+  void _fetchDepartmentName() async {
+    Department? dept = await _departmentService.getDepartmentById(widget.profile.departmentId!);
+    if (dept != null) {
+      setState(() {
+        _departmentName = dept.name;  // Assuming `name` is the field in Department
+      });
+    } else {
+      print('Department not found');
+    }
+  }
+
+
+  // Part of the _DeptHeadDashboardState class
+
+  Future<void> _handleAction(Leave leave, bool approve) async {
+    if (leave.id == null) return; // Safety check
+
+    // 1. Show processing message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${approve ? 'Approving' : 'Rejecting'} leave for ${leave.employee}...')),
+    );
+
+    try {
+      // 2. Call the appropriate service method
+      final updatedLeave = approve
+          ? await _leaveService.approveLeave(leave.id!)
+          : await _leaveService.rejectLeave(leave.id!);
+
+      if (!mounted) return;
+
+      // 3. Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Leave successfully ${updatedLeave?.status}!'),
+          backgroundColor: updatedLeave?.status == "APPROVED" ? Colors.green : Colors.red,
+        ),
+      );
+
+      // 4. Refresh the list to update the UI
+      _fetchLeaves();
+
+    } catch (e) {
+      if (!mounted) return;
+      // 5. Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to perform action: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+// Function to trigger data fetch
+  void _fetchLeaves() {
+    setState(() {
+      _leavesFuture = _leaveService.getLeavesByDept();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Department Head Dashboard"),
+        backgroundColor: Colors.blue.shade700,
+      ),
+      drawer: Sidebar(
+        role: widget.role,
+        profile: widget.profile,
+        authService: _authService,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
           children: [
-            Icon(icon, size: 40, color: Colors.blue),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ...content.map((line) => Text(line)).toList(),
-                ],
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Leave Requests for ${_departmentName ?? 'Loading department...'}', //have to name
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+            ),
+            FutureBuilder<List<Leave>>(
+              future: _leavesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Error loading leaves: ${snapshot.error}',
+                        style: TextStyle(fontSize: 16, color: Colors.red),
+                      ),
+                    ),
+                  );
+                } else {
+                  final leaves = snapshot.data!;
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics:const NeverScrollableScrollPhysics(),
+                    itemCount: leaves.length,
+                    itemBuilder: (context, index) {
+                      final leave = leaves[index];
+                      return _buildLeaveRequestCard(leave);
+
+                    }
+                  );
+                }
+              },
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildLeaveRequestCard(Leave leave) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        elevation: 3,
+      child: ListTile(
+        leading: CircleAvatar(
+          child: Text(leave.employee[0]),
+        ),
+        title: Text(
+          '${leave.employee} - ${leave.status}',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: leave.status == 'PENDING' ? Colors.orange.shade700 : Colors.green.shade700,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Start Date: ${leave.startDate}\nEnd Date: ${leave.endDate}',
+              ),
+              Text(
+                'Reason: ${leave.reason}',
+              ),
+            ],
+      ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Approve button (sets 'approve' to true)
+            IconButton(
+              icon: const Icon(Icons.check_circle_outline, color: Colors.green),
+              onPressed: () => _handleAction(leave, true),
+            ),
+            // Reject button (sets 'approve' to false)
+            IconButton(
+              icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+              onPressed: () => _handleAction(leave, false),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
 }

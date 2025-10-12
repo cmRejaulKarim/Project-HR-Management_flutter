@@ -36,4 +36,24 @@ class DepartmentService {
     }
     throw Exception('Failed to load departments');
   }
+
+  Future<Department?> getDepartmentById(int id) async {
+    final url = Uri.parse('$baseUrl/department/$id');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        return Department.fromJson(body);
+      } else {
+        print('Failed to fetch department: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching department: $e');
+      return null;
+    }
+  }
 }

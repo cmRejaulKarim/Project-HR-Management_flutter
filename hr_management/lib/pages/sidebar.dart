@@ -1,16 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:hr_management/entity/employee.dart';
 import 'package:hr_management/service/authservice.dart';
 
 class Sidebar extends StatelessWidget {
   final String role;
+  final Employee profile;
   final AuthService authService;
 
   const Sidebar({
     Key? key,
     required this.role,
+    required this.profile,
     required this.authService,
   }) : super(key: key);
 
+  // Helper method to construct the photo URL.
+  // This uses the logic you provided but ensures a mandatory photo URL is returned.
+  String get photoUrl {
+    final photo = profile.photo;
+
+    // 1. Check if the employee has a photo file name
+    if (photo != null && photo.isNotEmpty) {
+      return 'http://localhost:8085/images/employee/$photo';
+    }
+
+    // 2. If no photo is available, return a MANDATORY default image URL.
+    // NOTE: Ensure a file named 'default_profile.png' exists on your server at this path.
+    return 'http://localhost:8085/images/employee/default_profile.png';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +35,27 @@ class Sidebar extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blue),
-            child: Text(
-              'HRMS',
-              style: TextStyle(color: Colors.white, fontSize: 24),
+          // 🚀 User Photo, Email, Name (Role) at the top of the Drawer
+          UserAccountsDrawerHeader(
+            accountName: Text(
+              '${profile.name ?? 'No Name'} - (${role})',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            accountEmail: Text(
+              '${profile.email ?? 'No Email'}',
+            ),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.white,
+              // Use NetworkImage with the mandatory photoUrl getter
+              backgroundImage: NetworkImage(photoUrl),
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.blue,
             ),
           ),
+          // -----------------------------------------------------------------
+
+          // Sidebar Navigation Items
           ..._buildSidebarItems(context),
         ],
       ),
@@ -61,7 +92,7 @@ class Sidebar extends StatelessWidget {
         ];
       default:
         return [
-          ListTile(title: Text('No Role Found')),
+          const ListTile(title: Text('No Role Found')),
         ];
     }
   }
@@ -83,6 +114,7 @@ class Sidebar extends StatelessWidget {
         if (route == '/logout') {
           // Perform logout logic
           await authService.logout(); // Call your logout function
+          // Navigate to the login screen and remove all other routes from the stack
           Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
         } else {
           Navigator.pushNamed(context, route);
@@ -90,5 +122,4 @@ class Sidebar extends StatelessWidget {
       },
     );
   }
-
 }
