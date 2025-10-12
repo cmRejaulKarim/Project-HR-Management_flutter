@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:hr_management/pages/loginpage.dart';
+import 'package:hr_management/service/authservice.dart';
 
 class DeptHeadDashboard extends StatelessWidget {
   const DeptHeadDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final AuthService _authService = AuthService();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dept Head Dashboard'),
-        backgroundColor: const Color(0xFFF8F9FA),
+        backgroundColor: const Color(0xFF81817D),
         foregroundColor: Colors.blue,
         elevation: 1,
       ),
@@ -44,14 +47,21 @@ class DeptHeadDashboard extends StatelessWidget {
                 Navigator.pushNamed(context, '/leave');
               },
             ),
+            const Divider(
+              color: Colors.grey,
+              thickness: 1,
+              indent: 16,
+              endIndent: 16,
+            ),
             ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.red),
-              ),
-              onTap: () {
-                Navigator.pushNamed(context, '/logout');
+              title: Text('Logout'),
+              onTap: () async {
+                await _authService.logout();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
               },
             ),
           ],
@@ -60,19 +70,20 @@ class DeptHeadDashboard extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.count(
-          crossAxisCount: 1, // Use 2 for side-by-side on tablets
+          crossAxisCount: 1,
+          // Use 2 for side-by-side on tablets
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           childAspectRatio: 2.5,
           children: const [
             DashboardCard(
               title: 'Upcoming Holidays',
-              content: ['Sep 5 - Eid-e Milad-un-Nabi (Sm)*'],
+              content: [''],
               icon: Icons.calendar_today,
             ),
             DashboardCard(
               title: 'Employee Attendance',
-              content: ['Present Today: 45', 'On Leave: 3'],
+              content: [''],
               icon: Icons.people,
             ),
           ],
@@ -109,11 +120,13 @@ class DashboardCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      )),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   ...content.map((line) => Text(line)).toList(),
                 ],

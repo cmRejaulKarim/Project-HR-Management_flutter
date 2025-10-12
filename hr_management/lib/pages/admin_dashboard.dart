@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hr_management/pages/sidebar.dart';
 import 'package:hr_management/service/authservice.dart';
 
-class AccountantDash extends StatelessWidget {
+class AdminDashboard extends StatelessWidget {
   final String role;
-  const AccountantDash({super.key, required this.role});
+  const AdminDashboard({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +12,7 @@ class AccountantDash extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text("Dashboard")),
       drawer: Sidebar(role: role, authService: _authService),
-      body: Center(child: Text('Welcome, Accountant!')),
+      body: Center(child: Text('Welcome, Admin!')),
     );
   }
 }

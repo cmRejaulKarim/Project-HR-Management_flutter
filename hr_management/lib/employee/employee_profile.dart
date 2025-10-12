@@ -47,7 +47,6 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
   String _departmentName = 'N/A';
   String _designationName = 'N/A';
 
-
   // Forms Controllers
   final TextEditingController _advanceAmountController =
       TextEditingController();
@@ -84,12 +83,12 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       final leaves = await _leaveService.getCurrentMonthLeaveByUser();
 
       debugPrint('Loading advances...');
-      final advances = await _advanceService.getAdvanceRequests();
+      final advances = await _advanceService.viewAdvanceRequestsByEmp();
 
       if (widget.profile.departmentId != null) {
         final allDepts = await _departmentService.getAllDepartments();
         final dept = allDepts?.firstWhere(
-              (d) => d.id == widget.profile.departmentId,
+          (d) => d.id == widget.profile.departmentId,
           orElse: () => Department(id: -1, name: 'Unknown Department'),
         );
         _departmentName = dept?.name ?? 'N/A';
@@ -98,7 +97,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
         if (widget.profile.designationId != null) {
           final desgs = await _designationService.getAllDesignations();
           final desg = desgs!.firstWhere(
-                (d) => d.id == widget.profile.designationId,
+            (d) => d.id == widget.profile.designationId,
             orElse: () => Designation(id: -1, name: 'Unknown Designation'),
           );
           _designationName = desg.name;
@@ -148,12 +147,12 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     }
 
     try {
-      final success = await _advanceService.submitAdvanceRequest(
+      final success = await _advanceService.addAdvanceRequest(
         amount,
         reason,
       );
 
-      if (success) {
+      if (success != null) {
         // Dismiss dialog
         if (mounted) Navigator.of(context).pop();
 
@@ -323,10 +322,15 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       ),
     );
   }
+
   // Attendance Card
 
-// New helper function to build the Check-In/Check-Out rows with colored text
-  Widget _buildStyledAttendanceRow(IconData icon, String label, String value, {TextStyle? statusStyle}) {
+  Widget _buildStyledAttendanceRow(
+    IconData icon,
+    String label,
+    String value, {
+    TextStyle? statusStyle,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -338,11 +342,14 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
             child: RichText(
               text: TextSpan(
                 text: value,
-                style: TextStyle(color: Colors.black, fontSize: 14), // Default style
+                style: TextStyle(color: Colors.black, fontSize: 14),
+                // Default style
                 children: [
                   if (statusStyle != null)
                     TextSpan(
-                      text: value.contains('(Late)') ? ' (Late)' : (value.contains('Absent') ? ' Absent' : ''),
+                      text: value.contains('(Late)')
+                          ? ' (Late)'
+                          : (value.contains('Absent') ? ' Absent' : ''),
                       style: statusStyle,
                     ),
                 ],
@@ -364,10 +371,18 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     final String checkOutTime = _todayAttendance?.checkOut ?? 'N/A';
 
     // Define colored text styles
-    const TextStyle lateStyle = TextStyle(color: Colors.red, fontWeight: FontWeight.bold);
-    const TextStyle absentStyle = TextStyle(color: Colors.red, fontWeight: FontWeight.bold);
-    const TextStyle normalValueStyle = TextStyle(color: Colors.black, fontSize: 14);
-
+    const TextStyle lateStyle = TextStyle(
+      color: Colors.red,
+      fontWeight: FontWeight.bold,
+    );
+    const TextStyle absentStyle = TextStyle(
+      color: Colors.red,
+      fontWeight: FontWeight.bold,
+    );
+    const TextStyle normalValueStyle = TextStyle(
+      color: Colors.black,
+      fontSize: 14,
+    );
 
     // Attendance Card - Non-Collapsible
     return Card(
@@ -392,84 +407,99 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
             const Divider(),
             _isLoading
                 ? const Padding(
-              padding: EdgeInsets.symmetric(vertical: 10.0),
-              child: Center(child: CircularProgressIndicator()),
-            )
+                    padding: EdgeInsets.symmetric(vertical: 10.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
                 : Column(
-              children: [
-                // --- Check-In (with colored Late status) ---
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Row(
                     children: [
-                      const Icon(Icons.login, size: 20, color: Colors.purple),
-                      const SizedBox(width: 10),
-                      const Text('Check-In: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            text: checkInTime,
-                            style: normalValueStyle,
-                            children: [
-                              if (isLate)
-                                const TextSpan(
-                                  text: ' (Late)',
-                                  style: lateStyle,
+                      // --- Check-In (with colored Late status) ---
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.login,
+                              size: 20,
+                              color: Colors.purple,
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
+                              'Check-In: ',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Expanded(
+                              child: RichText(
+                                text: TextSpan(
+                                  text: checkInTime,
+                                  style: normalValueStyle,
+                                  children: [
+                                    if (isLate)
+                                      const TextSpan(
+                                        text: ' (Late)',
+                                        style: lateStyle,
+                                      ),
+                                  ],
                                 ),
-                            ],
-                          ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
 
-                // --- Check-Out (with colored Absent status) ---
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.logout, size: 20, color: Colors.purple),
-                      const SizedBox(width: 10),
-                      const Text('Check-Out: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            text: checkOutTime,
-                            style: normalValueStyle,
-                            children: [
-                              if (isAbsent)
-                                const TextSpan(
-                                  text: '  Absent',
-                                  style: absentStyle,
-                                )
-                              else if (checkOutTime == 'N/A')
-                                TextSpan(
-                                  text: ' (Pending)',
-                                  style: TextStyle(color: Colors.grey[600]),
+                      // --- Check-Out (with colored Absent status) ---
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.logout,
+                              size: 20,
+                              color: Colors.purple,
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
+                              'Check-Out: ',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Expanded(
+                              child: RichText(
+                                text: TextSpan(
+                                  text: checkOutTime,
+                                  style: normalValueStyle,
+                                  children: [
+                                    if (isAbsent)
+                                      const TextSpan(
+                                        text: '  Absent',
+                                        style: absentStyle,
+                                      )
+                                    else if (checkOutTime == 'N/A')
+                                      TextSpan(
+                                        text: ' (Pending)',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                            ],
-                          ),
+                              ),
+                            ),
+                          ],
                         ),
+                      ),
+                      _profileRow(
+                        Icons.timer_10,
+                        'Total Working Time',
+                        _todayAttendance?.totalWorkingTime != null
+                            ? '${_todayAttendance!.totalWorkingTime!.toStringAsFixed(2)} hrs'
+                            : 'N/A',
                       ),
                     ],
                   ),
-                ),
-                _profileRow(
-                  Icons.timer_10,
-                  'Total Working Time',
-                  _todayAttendance?.totalWorkingTime != null
-                      ? '${_todayAttendance!.totalWorkingTime!.toStringAsFixed(2)} hrs'
-                      : 'N/A',
-                ),
-              ],
-            ),
           ],
         ),
       ),
     );
   }
-
 
   Widget _buildLeaveHistory() {
     // Leave History - Non-Collapsible Card (CHANGE)
@@ -588,29 +618,34 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  child: ElevatedButton.icon(
-                    onPressed: _showAdvanceRequestDialog,
-                    icon: const Icon(Icons.add),
-                    label: const Text("Request New Advance Salary"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('No advance request found for this month.'),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _showAdvanceRequestDialog,
+                          icon: const Icon(Icons.add, color: Colors.black),
+                          label: const Text(
+                            "Request Advance Salary",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            elevation: 2,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 )
-              //
-              // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              // child: ElevatedButton.icon(
-              // onPressed: _showAdvanceRequestDialog, // Trigger Dialog with eligibility check
-              // icon: const Icon(Icons.money),
-              // label: const Text("Request Advance Salary"),
-              // style: ElevatedButton.styleFrom(
-              // backgroundColor: Colors.red,
-              // foregroundColor: Colors.white,
-              // minimumSize: const Size(double.infinity, 50),
-              // ),
-              // ),
               : ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -896,7 +931,8 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadDashboardData, // Call the existing data fetching method
+            onPressed:
+                _loadDashboardData, // Call the existing data fetching method
           ),
           IconButton(
             icon: const Icon(Icons.logout),

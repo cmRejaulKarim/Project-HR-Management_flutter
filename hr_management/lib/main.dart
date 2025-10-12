@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hr_management/employee/employee_profile.dart';
 import 'package:hr_management/pages/loginpage.dart';
 import 'package:hr_management/pages/accountant_dash.dart';
-import 'package:hr_management/pages/adminpage.dart';
+import 'package:hr_management/pages/admin_dashboard.dart';
 import 'package:hr_management/pages/department_page.dart';
 import 'package:hr_management/pages/dept_head_dashboard.dart';
 import 'package:hr_management/pages/registrationpage.dart';
@@ -26,12 +26,10 @@ class MyApp extends StatelessWidget {
       // Named routes
       routes: {
         '/login': (context) => LoginPage(),
-        '/admin': (context) => AdminPage(),
-        '/accountant': (context) => AccountantDash(),
         '/deptHeadDash': (context) => DeptHeadDashboard(),
         '/registration': (context) => Registration(),
         '/departments': (context) => DepartmentPage(),
-        // Note: EmployeeDashboard is not listed because it needs a parameter
+        // '/logout':
       },
     );
   }
