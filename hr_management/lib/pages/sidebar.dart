@@ -76,7 +76,7 @@ class Sidebar extends StatelessWidget {
       case 'DEPARTMENT_HEAD':
         return [
           _navItem(context, 'Dept Head Dashboard', '/deptheadprofile'),
-          _navItem(context, 'Leave Request', '/leave'),
+          _navItem(context, 'Leave Request', '/dLeave'),
           _navItem(context, 'Dept Attendance', '/attendancebydept'),
           _navItem(context, 'Holidays', '/holidayview'),
           _logout(context, 'Logout', '/logout'),

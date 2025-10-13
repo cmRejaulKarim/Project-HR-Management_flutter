@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hr_management/pages/leave_Request_submit.dart';
 import 'package:hr_management/pages/loginpage.dart';
 import 'package:hr_management/pages/department_page.dart';
 import 'package:hr_management/pages/registrationpage.dart';
+import 'package:hr_management/pages/view_leave_request.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,6 +26,10 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginPage(),
         '/registration': (context) => Registration(),
         '/departments': (context) => DepartmentPage(),
+        //view leave page
+        '/dLeave': (context) => DepartmentLeaveViewPage(),
+
+
       },
     );
   }

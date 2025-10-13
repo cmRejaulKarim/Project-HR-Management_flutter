@@ -4,7 +4,7 @@
 
 class Leave {
   final int? id;
-  // This field is used when SENDING data (for simplicity, often just the ID is sent).
+  // This field is used when SENDING data (the ID of the employee).
   final int? empId;
   // This field holds the actual nested Employee object received from the API (for display).
   final dynamic employee; // Use dynamic or a separate Employee model
@@ -20,7 +20,7 @@ class Leave {
   Leave({
     this.id,
     this.empId,
-    required this.employee,
+    required this.employee, // 'dynamic' will hold the Map<String, dynamic> from API
     required this.startDate,
     required this.endDate,
     required this.totalLeaveDays,
@@ -32,17 +32,17 @@ class Leave {
 
   // Convert JSON to Leave object (used for FETCHING data)
   factory Leave.fromJson(Map<String, dynamic> json) {
-    // The 'employee' field is a nested object in the fetched JSON.
-    final Map<String, dynamic> employeeData = json['employee'];
-
-    // Extract the employee ID from the nested object for the empId field.
-    final int? parsedEmpId = employeeData['id'] as int?;
+    // Check if 'employee' is a Map (nested object)
+    final dynamic employeeData = json['employee'];
+    final int? parsedEmpId = (employeeData is Map<String, dynamic> && employeeData.containsKey('id'))
+        ? employeeData['id'] as int?
+        : null;
 
     return Leave(
       id: json['id'] as int?,
       // Populate empId from the nested employee object's ID.
       empId: parsedEmpId,
-      // Store the full nested employee data (you can replace 'dynamic' with your Employee model).
+      // Store the full nested employee data (Map or the full Employee object if you create that model).
       employee: employeeData,
 
       startDate: json['startDate'] as String,
@@ -57,7 +57,7 @@ class Leave {
 
   // Convert Leave object to JSON (used for SAVING/SENDING data to the API)
   Map<String, dynamic> toJson() {
-    // Use the empId field for saving. If not provided, try to extract it from the nested 'employee' field.
+    // 1. Determine the Employee ID to send.
     int? employeeIdToSend;
     if (empId != null) {
       employeeIdToSend = empId;
@@ -65,12 +65,19 @@ class Leave {
       employeeIdToSend = employee['id'] as int?;
     }
 
+    // 2. CRITICAL FIX: Wrap the ID in a nested 'employee' object.
+    Map<String, dynamic>? employeeJson;
+    if (employeeIdToSend != null) {
+      // This produces: {"employee": {"id": 1}}
+      employeeJson = {'id': employeeIdToSend};
+    }
+
     return {
       // Include 'id' only if it's an update operation
       if (id != null) 'id': id,
 
-      // Send the employee ID under the key 'employee' as required by your Spring entity setup
-      if (employeeIdToSend != null) 'employee': employeeIdToSend,
+      // Send the nested employee ID object (required by Spring for @ManyToOne)
+      if (employeeJson != null) 'employee': employeeJson,
 
       'startDate': startDate,
       'endDate': endDate,
