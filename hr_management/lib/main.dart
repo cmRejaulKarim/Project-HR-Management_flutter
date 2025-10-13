@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hr_management/pages/advance_request_list_page.dart';
 import 'package:hr_management/pages/leave_Request_submit.dart';
 import 'package:hr_management/pages/loginpage.dart';
 import 'package:hr_management/pages/department_page.dart';
@@ -26,7 +27,9 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginPage(),
         '/registration': (context) => Registration(),
         '/departments': (context) => DepartmentPage(),
-        //view leave page
+        //view advance page
+        '/advance': (context) => AdvanceRequestListPage(),
+
         '/dLeave': (context) => DepartmentLeaveViewPage(),
 
 

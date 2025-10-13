@@ -67,7 +67,6 @@ class Sidebar extends StatelessWidget {
       case 'ADMIN':
         return [
           _navItem(context, 'Admin Dashboard', '/adminprofile'),
-          _navItem(context, 'Add Department', '/addDept'),
           _navItem(context, 'View All Employees', '/viewallemp'),
           _navItem(context, 'Department Employees', '/deptEmps'),
           _navItem(context, 'Yearly Sal Report', '/getYearSal'),
@@ -85,8 +84,7 @@ class Sidebar extends StatelessWidget {
         return [
           _navItem(context, 'Accountant Dashboard', '/accountantprofile'),
           _navItem(context, 'Add Holiday', '/holidayadd'),
-          _navItem(context, 'Advance Salary Requests', '/advsal'),
-          _navItem(context, 'Add/Create Salary', '/addsal'),
+          _navItem(context, 'Advance Salary Requests', '/advance'),
           _navItem(context, 'View Monthly Salary', '/createsal'),
           _logout(context, 'Logout', '/logout'),
         ];
