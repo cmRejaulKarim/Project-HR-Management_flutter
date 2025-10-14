@@ -35,6 +35,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   http: ^1.5.0
+  intl: ^0.18.0
   dob_input_field: ^2.0.0
   date_field: ^6.0.0
   radio_group_v2: ^3.3.1

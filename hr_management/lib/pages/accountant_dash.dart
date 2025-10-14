@@ -23,7 +23,7 @@ class AccountantDash extends StatefulWidget {
 
 class _AccountantDashState extends State<AccountantDash> {
   // Define constants for navigation items
-  static const String dashRoute = 'Dashboard';
+  static const String dashRoute = 'HR (Accounts)';
   static const String advanceRequestRoute = 'Advance Requests';
   static const String profileRoute = 'My Profile';
 
