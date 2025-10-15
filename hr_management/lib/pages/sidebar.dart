@@ -53,34 +53,35 @@ class Sidebar extends StatelessWidget {
     switch (role) {
       case 'ADMIN':
         return [
-          _navItem(context, 'Admin Dashboard', '/adminprofile'),
+          _navItem(context, 'Admin Dashboard', '/adminProfile'),
           // ✅ Changed to _navItemWithProfile (uses push)
           _navItemWithProfile(context, 'View Profile'),
-          _navItem(context, 'View All Employees', '/viewallemp'),
-          _navItem(context, 'Department Employees', '/deptEmps'),
+          _navItem(context, 'View All Employees', '/viewAllEmp'),
+          _navItem(context, 'Department Employees', '/EmpByDept'),
           _navItem(context, 'Holidays', '/viewHoliday'),
           _navItem(context, 'Yearly Sal Report', '/getYearSal'),
           _logout(context, 'Logout', '/logout'),
         ];
       case 'DEPARTMENT_HEAD':
         return [
-          _navItem(context, 'Dept Head Dashboard', '/deptheadprofile'),
+          _navItem(context, 'Dept Head Dashboard', '/deptHeadProfile'),
           // ✅ Changed to _navItemWithProfile (uses push)
           _navItemWithProfile(context, 'View Profile'),
           _navItem(context, 'Leave Request', '/dLeave'),
-          _navItem(context, 'Dept Attendance', '/attendancebydept'),
+          _navItem(context, 'All Employees', '/deptEmp'),
+          _navItem(context, 'Dept Attendance', '/attendanceByDept'),
           _navItem(context, 'Holidays', '/viewHoliday'),
           _logout(context, 'Logout', '/logout'),
         ];
       case 'ACCOUNTANT':
         return [
-          _navItem(context, 'Accountant Dashboard', '/accountantprofile'),
+          _navItem(context, 'Accountant Dashboard', '/accountantProfile'),
           // ✅ Changed to _navItemWithProfile (uses push)
           _navItemWithProfile(context, 'View Profile'),
           _navItem(context, 'Holiday Management', '/addHoliday'),
           _navItem(context, 'Holidays', '/viewHoliday'),
           _navItem(context, 'Advance Salary Requests', '/advance'),
-          _navItem(context, 'View Monthly Salary', '/createsal'),
+          _navItem(context, 'View Monthly Salary', '/createSal'),
           _logout(context, 'Logout', '/logout'),
         ];
       default:
