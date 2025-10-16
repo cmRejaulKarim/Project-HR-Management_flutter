@@ -7,6 +7,9 @@ import '../entity/designation.dart'; // Needed for type hints in Employee
 class EmployeeDetails {
   // We keep the primary Employee object which holds all raw data
   final Employee employee;
+  // final Department? department;
+  // final Designation? designation;
+
 
   // The Employee model should contain the nested Department and Designation objects
   // received directly from the Spring Boot API (if it's a detail endpoint).
@@ -14,7 +17,7 @@ class EmployeeDetails {
   // NOTE: The constructor is simplified because the employee object already has the nested data.
 
   EmployeeDetails({
-    required this.employee,
+    required this.employee, required
   });
 
   // ---------------------------------------------

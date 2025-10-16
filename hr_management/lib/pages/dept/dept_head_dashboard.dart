@@ -42,14 +42,14 @@ class _DeptHeadDashboardState extends State<DeptHeadDashboard> {
   // --- Data Fetching Logic (Only for Dept Name) ---
 
   void _fetchDepartmentName() async {
-    if (widget.profile.departmentId != null) {
-      Department? dept = await _departmentService.getDepartmentById(widget.profile.departmentId!);
+    if (widget.profile.department != null) {
+      Department? dept = await _departmentService.getDepartmentById(widget.profile.department!.id);
       if (dept != null) {
         setState(() {
           _departmentName = dept.name;
         });
       } else {
-        debugPrint('Department not found for ID: ${widget.profile.departmentId}');
+        debugPrint('Department not found for ID: ${widget.profile.department}');
       }
     }
   }

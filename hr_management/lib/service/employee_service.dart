@@ -210,12 +210,12 @@ class EmployeeService {
     }
 
     // 2. Fetch Department and Designation concurrently
-    final departmentFuture = employee.departmentId != null
-        ? getDepartmentById(employee.departmentId!)
+    final departmentFuture = employee.department != null
+        ? getDepartmentById(employee.department!.id)
         : Future<Department?>.value(null);
 
-    final designationFuture = employee.designationId != null
-        ? getDesignationById(employee.designationId!)
+    final designationFuture = employee.designation != null
+        ? getDesignationById(employee.designation!.id)
         : Future<Designation?>.value(null);
 
     final results = await Future.wait([departmentFuture, designationFuture]);
@@ -226,8 +226,8 @@ class EmployeeService {
     // 3. Combine into the EmployeeDetails view model
     return EmployeeDetails(
       employee: employee,
-      department: department,
-      designation: designation,
+      // department: department,
+      // designation: designation,
     );
   }
 

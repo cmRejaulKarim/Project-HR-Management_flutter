@@ -85,19 +85,19 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       debugPrint('Loading advances...');
       final advances = await _advanceService.viewAdvanceRequestsByEmp();
 
-      if (widget.profile.departmentId != null) {
+      if (widget.profile.department != null) {
         final allDepts = await _departmentService.getAllDepartments();
         final dept = allDepts?.firstWhere(
-          (d) => d.id == widget.profile.departmentId,
+          (d) => d.id == widget.profile.department,
           orElse: () => Department(id: -1, name: 'Unknown Department'),
         );
         _departmentName = dept?.name ?? 'N/A';
 
         // Fetch designations for the specific department to get the name
-        if (widget.profile.designationId != null) {
+        if (widget.profile.designation != null) {
           final desgs = await _designationService.getAllDesignations();
           final desg = desgs!.firstWhere(
-            (d) => d.id == widget.profile.designationId,
+            (d) => d.id == widget.profile.designation,
             orElse: () => Designation(id: -1, name: 'Unknown Designation'),
           );
           _designationName = desg.name;

@@ -1,17 +1,25 @@
+// lib/entity/employee.dart
+
+import 'department.dart'; // Ensure you have this model
+import 'designation.dart'; // Ensure you have this model
+
 class Employee {
   final int id;
   final String name;
   final String email;
-  final String? photo; // optional
+  final String? photo;
   final String? address;
   final String? gender;
-  final String? dateOfBirth; // or DateTime
-  final int? departmentId;
-  final int? designationId;
+  final String? dateOfBirth;
   final String? joiningDate;
   final String? phone;
   final double? basicSalary;
+  final double? allowance; // ✅ ADDED: Field for allowance
   final bool? active;
+
+  // ✅ UPDATED: Store the full nested objects
+  final Department? department;
+  final Designation? designation;
 
   Employee({
     required this.id,
@@ -21,40 +29,52 @@ class Employee {
     this.address,
     this.gender,
     this.dateOfBirth,
-    this.departmentId,
-    this.designationId,
     this.joiningDate,
     this.phone,
     this.basicSalary,
+    this.allowance, // Added to constructor
     this.active,
+    this.department, // Added to constructor
+    this.designation, // Added to constructor
   });
 
   factory Employee.fromJson(Map<String, dynamic> json) {
-    return Employee(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      photo: json['photo'],
-      address: json['address'],
-      gender: json['gender'],
-      dateOfBirth: json['dateOfBirth'],
-      // departmentId: json['department'],
-      // designationId: json['designation'],
-      // ✅ FIX: extract `id` from department and designation objects
-      departmentId: json['department'] is Map ? json['department']['id'] : json['department'],
-      designationId: json['designation'] is Map ? json['designation']['id'] : json['designation'],
+    // Helper function to safely parse nested objects or return null
+    T? _parseNested<T>(dynamic data, T Function(Map<String, dynamic>) fromJson) {
+      if (data is Map<String, dynamic>) {
+        return fromJson(data);
+      }
+      return null;
+    }
 
-      joiningDate: json['joiningDate'],
-      phone: json['phone'],
+    // Fallback to ID-only if the value is an int (e.g., from a list DTO)
+    // NOTE: If you need to retrieve the ID from a simple list endpoint,
+    // you should create a separate, leaner EmployeeListItem model instead.
+
+    return Employee(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      email: json['email'] as String,
+      photo: json['photo'] as String?,
+      address: json['address'] as String?,
+      gender: json['gender'] as String?,
+      dateOfBirth: json['dateOfBirth'] as String?,
+      joiningDate: json['joiningDate'] as String?,
+      phone: json['phone'] as String?,
+
+      // Handle numeric conversion safely
       basicSalary: (json['basicSalary'] as num?)?.toDouble(),
+      allowance: (json['allowance'] as num?)?.toDouble(), // ✅ PARSED allowance
       active: json['active'] as bool?,
+
+      // ✅ Handle nested objects (Department/Designation)
+      department: _parseNested(json['department'], Department.fromJson),
+      designation: _parseNested(json['designation'], Designation.fromJson),
     );
   }
-  //basicSalary:  (json['basicSalary'] != null)
-  // ? (json['basicSalary'] as num).toDouble()
-  //     : null,
 
-
+  // NOTE: When sending data back to Spring, you typically only send IDs if needed, 
+  // or a specific DTO map. This toJson sends nulls for complex objects.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -64,91 +84,14 @@ class Employee {
       if (address != null) 'address': address,
       if (gender != null) 'gender': gender,
       if (dateOfBirth != null) 'dateOfBirth': dateOfBirth,
-      if (departmentId != null) 'department': departmentId,
-      if (designationId != null) 'designation': designationId,
+      // If sending back, usually only the ID is needed for related entities
+      if (department != null) 'departmentId': department!.id,
+      if (designation != null) 'designationId': designation!.id,
       if (joiningDate != null) 'joiningDate': joiningDate,
       if (phone != null) 'phone': phone,
       if (basicSalary != null) 'basicSalary': basicSalary,
+      if (allowance != null) 'allowance': allowance,
       if (active != null) 'active': active,
     };
   }
-
-  String? operator [](String other) {}
 }
-// class Employee {
-//   final int id;
-//   final String name;
-//   final String email;
-//   final String? photo;
-//   final String? address;
-//   final String? gender;
-//   final String? dateOfBirth;
-//   final int? departmentId;
-//   final int? designationId;
-//   final String? joiningDate;
-//   final String? phone;
-//   final double? basicSalary;
-//   final bool? active;
-//
-//   Employee({
-//     required this.id,
-//     required this.name,
-//     required this.email,
-//     this.photo,
-//     this.address,
-//     this.gender,
-//     this.dateOfBirth,
-//     this.departmentId,
-//     this.designationId,
-//     this.joiningDate,
-//     this.phone,
-//     this.basicSalary,
-//     this.active, // ✅ ADDED
-//   });
-//
-//   factory Employee.fromJson(Map<String, dynamic> json) {
-//     // Note: The Spring Boot EmployeeDTO sends department/designation as IDs (Long)
-//     // The previous implementation for nested objects is still good practice for other endpoints
-//     // but for the DTO-based endpoints, they will likely be just 'department' (ID)
-//     final departmentValue = json['department'];
-//     final designationValue = json['designation'];
-//
-//     return Employee(
-//       id: json['id'] as int,
-//       name: json['name'] as String,
-//       email: json['email'] as String,
-//       photo: json['photo'] as String?,
-//       address: json['address'] as String?,
-//       gender: json['gender'] as String?,
-//       dateOfBirth: json['dateOfBirth'] as String?,
-//
-//       // Since the controller uses EmployeeDTO (which has Long/int IDs),
-//       // we primarily expect an ID, but handle both object or ID for robustness.
-//       departmentId: departmentValue is int
-//           ? departmentValue
-//           : (departmentValue is Map ? departmentValue['id'] as int? : null),
-//       designationId: designationValue is int
-//           ? designationValue
-//           : (designationValue is Map ? designationValue['id'] as int? : null),
-//
-//       joiningDate: json['joiningDate'] as String?,
-//       phone: json['phone'] as String?,
-//       basicSalary: (json['basicSalary'] as num?)?.toDouble(),
-//       active: json['active'] as bool?,
-//     );
-//   }
-//
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'id': id,
-//       'name': name,
-//       'email': email,
-//       // ... other fields ...
-//       if (departmentId != null) 'department': departmentId,
-//       if (designationId != null) 'designation': designationId,
-//       // ... other fields ...
-//       if (basicSalary != null) 'basicSalary': basicSalary,
-//       if (active != null) 'active': active,
-//     };
-//   }
-// }
