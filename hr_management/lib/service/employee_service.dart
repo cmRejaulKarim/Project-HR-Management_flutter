@@ -1,15 +1,63 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:hr_management/service/auth_service.dart';
+
 // Import the Employee model so the service can return a concrete type
 import 'package:hr_management/entity/employee.dart';
 
 class EmployeeService {
   final String baseUrl = "http://localhost:8085/api";
 
-  // CHANGED RETURN TYPE from Map<String, dynamic>? to Employee?
+  Future<Map<String, String>> _getAuthHeaders({
+    bool isMultipart = false,
+  }) async {
+    String? token = await AuthService().getToken();
+    final Map<String, String> headers = {'Authorization': 'Bearer $token'};
+    if (!isMultipart) {
+      headers['Content-Type'] = 'application/json';
+    }
+    return headers;
+  }
+
+  // Maps to: @PostMapping("/register")
+  Future<bool> registerEmployee({
+    required Map<String, dynamic> userData,
+    required Map<String, dynamic> employeeDtoData,
+    required String photoPath,
+  }) async {
+    final url = Uri.parse('$baseUrl/employee/register');
+    String? token = await AuthService().getToken();
+    if (token == null) return false;
+
+    var request = http.MultipartRequest('POST', url)
+      ..headers.addAll({'Authorization': 'Bearer $token'});
+
+    final registrationDTO = {'user': userData, 'employeeDTO': employeeDtoData};
+    final jsonString = jsonEncode(registrationDTO);
+
+    request.fields['data'] = jsonString;
+
+    try {
+      request.files.add(await http.MultipartFile.fromPath('photo', photoPath));
+    } catch (e) {
+      print('Error reading photo file: $e');
+      return false;
+    }
+
+    // 5. Send the request
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print('Employee registered successfully: ${response.body}');
+      return true;
+    } else {
+      print('Registration failed: ${response.statusCode} - ${response.body}');
+      return false;
+    }
+  }
+
   Future<Employee?> getEmployeeProfile() async {
-    // Using a new instance of AuthService to avoid dependency issues if not injected
     String? token = await AuthService().getToken();
 
     if (token == null) {
@@ -35,5 +83,75 @@ class EmployeeService {
       print('Failed to fetch employee profile: ${response.body}');
       return null;
     }
+  }
+
+  // Maps to: @GetMapping("/{id}")
+  Future<Employee?> getEmployeeById(int employeeId) async {
+    final url = Uri.parse('$baseUrl/employee/$employeeId');
+    final response = await http.get(url, headers: await _getAuthHeaders());
+
+    if (response.statusCode == 200) {
+      return Employee.fromJson(jsonDecode(response.body));
+    }
+    print('Failed to fetch employee by ID $employeeId: ${response.statusCode}');
+    return null;
+  }
+
+  // Maps to: @GetMapping("/all") (The DTO version)
+  Future<List<Employee>> getAllEmployees() async {
+    final url = Uri.parse('$baseUrl/employee/all');
+    final response = await http.get(url, headers: await _getAuthHeaders());
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.map((json) => Employee.fromJson(json)).toList();
+    }
+    print('Failed to fetch all employees: ${response.statusCode}');
+    return [];
+  }
+
+  // Maps to: @GetMapping("/byDept")
+  Future<List<Employee>> getEmployeesByDept() async {
+    final url = Uri.parse('$baseUrl/employee/byDept');
+    final response = await http.get(url, headers: await _getAuthHeaders());
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.map((json) => Employee.fromJson(json)).toList();
+    }
+    print('Failed to fetch employees by department: ${response.statusCode}');
+    return [];
+  }
+
+  // Maps to: @GetMapping("/groupByDept")
+  Future<List<Map<String, dynamic>>> getEmployeesGroupedByDepartment() async {
+    final url = Uri.parse('$baseUrl/employee/groupByDept');
+    final response = await http.get(url, headers: await _getAuthHeaders());
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+
+      return jsonList.cast<Map<String, dynamic>>();
+    }
+    print(
+      'Failed to fetch employees grouped by department: ${response.statusCode}',
+    );
+    return [];
+  }
+
+  // Maps to: @PutMapping("/suspend/{id}")
+  Future<bool> suspendEmployee(int employeeId) async {
+    final url = Uri.parse('$baseUrl/employee/suspend/$employeeId');
+    final response = await http.put(url, headers: await _getAuthHeaders());
+
+    return response.statusCode == 200;
+  }
+
+  // Maps to: @PutMapping("/resume/{id}")
+  Future<bool> resumeEmployee(int employeeId) async {
+    final url = Uri.parse('$baseUrl/employee/resume/$employeeId');
+    final response = await http.put(url, headers: await _getAuthHeaders());
+
+    return response.statusCode == 200;
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../entity/leave.dart';
-import '../service/leave_service.dart';
+import '../../entity/leave.dart';
+import '../../service/leave_service.dart';
 
 class DepartmentLeaveViewPage extends StatefulWidget {
   const DepartmentLeaveViewPage({super.key});

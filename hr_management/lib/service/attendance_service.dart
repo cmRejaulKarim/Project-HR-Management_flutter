@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
+import 'package:hr_management/entity/AttendanceMonthlySummary.dart';
 import 'package:hr_management/entity/attendance.dart';
 import 'package:hr_management/service/auth_service.dart';
 import 'package:http/http.dart' as http;
@@ -113,7 +115,7 @@ class AttendanceService {
     }
   }
 
-  // ✅ Department Today Log
+  // ✅ Department Today Log (UPDATED to use new URL and return typed list)
   Future<List<Attendance>> getDepartmentTodayLog() async {
     final headers = await _getHeaders();
     final response = await http.get(
@@ -122,16 +124,23 @@ class AttendanceService {
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      return data.map((e) => Attendance.fromJson(e)).toList();
+      try {
+        final List<dynamic> data = jsonDecode(response.body);
+        // The DTOs returned by the Spring controller need to be mapped to the Attendance model.
+        return data.map((e) => Attendance.fromJson(e)).toList();
+      } catch (e) {
+        debugPrint('Error decoding department today log JSON: $e');
+        return [];
+      }
     } else {
-      print('Failed to get department today log: ${response.statusCode}');
+      debugPrint('Failed to get department today log: ${response.statusCode}');
       return [];
     }
   }
 
-  // ✅ Department Monthly Summary
-  Future<List<dynamic>> getDepartmentMonthlySummary(int year, int month) async {
+  // ✅ Department Monthly Summary (UPDATED to return typed list and parse DTO)
+  Future<List<AttendanceMonthlySummary>> getDepartmentMonthlySummary(
+      int year, int month) async {
     final headers = await _getHeaders();
     final response = await http.get(
       Uri.parse('$baseUrl/department/monthly-summary?year=$year&month=$month'),
@@ -139,9 +148,15 @@ class AttendanceService {
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      try {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => AttendanceMonthlySummary.fromJson(e)).toList();
+      } catch (e) {
+        debugPrint('Error decoding monthly summary JSON: $e');
+        return [];
+      }
     } else {
-      print('Failed to get department monthly summary: ${response.statusCode}');
+      debugPrint('Failed to get department monthly summary: ${response.statusCode}');
       return [];
     }
   }

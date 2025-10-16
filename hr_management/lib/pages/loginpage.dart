@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hr_management/employee/employee_profile.dart';
-import 'package:hr_management/pages/accountant_dash.dart';
-import 'package:hr_management/pages/admin_dashboard.dart';
+import 'package:hr_management/pages/hr/accountant_dash.dart';
+import 'package:hr_management/pages/hr/admin_dashboard.dart';
 import 'package:hr_management/pages/department_page.dart';
-import 'package:hr_management/pages/dept_head_dashboard.dart';
+import 'package:hr_management/pages/dept/dept_head_dashboard.dart';
 import 'package:hr_management/pages/registrationpage.dart';
 import 'package:hr_management/service/auth_service.dart';
 import 'package:hr_management/service/employee_service.dart';

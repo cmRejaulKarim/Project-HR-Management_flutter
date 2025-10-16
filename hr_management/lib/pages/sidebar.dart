@@ -69,7 +69,7 @@ class Sidebar extends StatelessWidget {
           _navItemWithProfile(context, 'View Profile'),
           _navItem(context, 'Leave Request', '/dLeave'),
           _navItem(context, 'All Employees', '/deptEmp'),
-          _navItem(context, 'Dept Attendance', '/attendanceByDept'),
+          _navItem(context, 'Dept Attendance', '/dAttend'),
           _navItem(context, 'Holidays', '/viewHoliday'),
           _logout(context, 'Logout', '/logout'),
         ];

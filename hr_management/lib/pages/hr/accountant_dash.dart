@@ -5,7 +5,7 @@ import 'package:hr_management/pages/sidebar.dart';
 import 'package:hr_management/service/auth_service.dart';
 
 // Import the required pages
-import 'package:hr_management/pages/advance_request_list_page.dart';
+import 'package:hr_management/pages/advance/advance_request_list_page.dart';
 
 class AccountantDash extends StatefulWidget {
   final String role;
