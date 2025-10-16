@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:hr_management/entity/advance.dart'; // Ensure the updated model is imported
-import 'package:hr_management/service/authservice.dart';
+import 'package:hr_management/service/auth_service.dart';
 import 'package:http/http.dart' as http;
 
 class AdvanceService {

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:hr_management/entity/attendance.dart';
-import 'package:hr_management/service/authservice.dart';
+import 'package:hr_management/service/auth_service.dart';
 import 'package:http/http.dart' as http;
 
 class AttendanceService {

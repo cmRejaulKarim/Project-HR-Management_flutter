@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hr_management/entity/department.dart';
 import 'package:hr_management/entity/designation.dart';
 import 'package:hr_management/pages/loginpage.dart';
-import 'package:hr_management/service/authservice.dart';
+import 'package:hr_management/service/auth_service.dart';
 import 'package:hr_management/service/department_service.dart';
 import 'package:hr_management/service/designation_service.dart';
 import 'package:hr_management/utils/image_picker_service.dart';

@@ -6,7 +6,7 @@ import 'package:hr_management/pages/admin_dashboard.dart';
 import 'package:hr_management/pages/department_page.dart';
 import 'package:hr_management/pages/dept_head_dashboard.dart';
 import 'package:hr_management/pages/registrationpage.dart';
-import 'package:hr_management/service/authservice.dart';
+import 'package:hr_management/service/auth_service.dart';
 import 'package:hr_management/service/employee_service.dart';
 
 class LoginPage extends StatelessWidget {

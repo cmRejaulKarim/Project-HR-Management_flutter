@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hr_management/employee/employee_profile.dart';
 import 'package:hr_management/entity/employee.dart';
-import 'package:hr_management/service/authservice.dart';
+import 'package:hr_management/service/auth_service.dart';
 
 class Sidebar extends StatelessWidget {
   final String role;

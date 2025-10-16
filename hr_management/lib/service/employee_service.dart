@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:hr_management/service/authservice.dart';
+import 'package:hr_management/service/auth_service.dart';
 // Import the Employee model so the service can return a concrete type
 import 'package:hr_management/entity/employee.dart';
 

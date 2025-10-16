@@ -5,7 +5,7 @@ import 'package:hr_management/entity/employee.dart';
 // Note: Leave import can be removed if no leave data/logic remains.
 // import 'package:hr_management/entity/leave.dart';
 import 'package:hr_management/pages/sidebar.dart';
-import 'package:hr_management/service/authservice.dart';
+import 'package:hr_management/service/auth_service.dart';
 import 'package:hr_management/service/department_service.dart';
 // Note: LeaveService import can be removed if no leave data/logic remains.
 // import 'package:hr_management/service/leave_service.dart';

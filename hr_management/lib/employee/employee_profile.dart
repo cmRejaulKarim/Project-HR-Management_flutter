@@ -9,7 +9,7 @@ import 'package:hr_management/entity/attendance.dart';
 import 'package:hr_management/entity/leave.dart';
 
 // Assuming these imports resolve to your defined service classes
-import 'package:hr_management/service/authservice.dart';
+import 'package:hr_management/service/auth_service.dart';
 import 'package:hr_management/service/department_service.dart';
 import 'package:hr_management/service/designation_service.dart';
 import 'package:hr_management/service/employee_service.dart';
