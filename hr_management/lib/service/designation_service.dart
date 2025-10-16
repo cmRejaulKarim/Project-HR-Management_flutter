@@ -38,4 +38,24 @@ class DesignationService {
     }
     throw Exception('Failed to load designations');
   }
+
+  Future<Designation?> getDesignationById(int id) async {
+    final url = Uri.parse('$baseUrl/designation/$id');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        return Designation.fromJson(body);
+      } else {
+        print('Failed to fetch designation: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching designation: $e');
+      return null;
+    }
+  }
 }

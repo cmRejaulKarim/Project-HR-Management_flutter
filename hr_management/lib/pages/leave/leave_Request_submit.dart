@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../entity/leave.dart';
-import '../../service/leave_service.dart'; // Assuming your LeaveService is here
+import '../../service/leave_service.dart';
 
 class LeaveRequestPage extends StatefulWidget {
-  // Assuming you can pass the logged-in employee's ID to this page
   final int loggedInEmpId;
 
   const LeaveRequestPage({super.key, required this.loggedInEmpId});
@@ -63,7 +62,6 @@ class _LeaveRequestPageState extends State<LeaveRequestPage> {
         return;
       }
       final difference = _endDate!.difference(_startDate!).inDays;
-      // Add 1 to make it inclusive (e.g., May 1 to May 1 is 1 day)
       setState(() {
         _totalLeaveDays = difference + 1;
       });

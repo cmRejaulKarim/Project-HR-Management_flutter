@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hr_management/employee/employee_profile.dart';
+import 'package:hr_management/pages/employee/employee_profile.dart';
 import 'package:hr_management/entity/department.dart';
 import 'package:hr_management/entity/employee.dart';
 // Note: Leave import can be removed if no leave data/logic remains.

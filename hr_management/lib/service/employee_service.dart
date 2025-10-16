@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:hr_management/entity/department.dart';
+import 'package:hr_management/entity/designation.dart';
+import 'package:hr_management/entity/employee_details_view.dart';
 import 'package:http/http.dart' as http;
 import 'package:hr_management/service/auth_service.dart';
 
@@ -154,4 +157,78 @@ class EmployeeService {
 
     return response.statusCode == 200;
   }
+
+  //for employee profile detail
+
+  Future<Department?> getDepartmentById(int id) async {
+    final url = Uri.parse('$baseUrl/department/$id');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        return Department.fromJson(body);
+      } else {
+        print('Failed to fetch department: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching department: $e');
+      return null;
+    }
+  }
+
+  Future<Designation?> getDesignationById(int id) async {
+    final url = Uri.parse('$baseUrl/designation/$id');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        return Designation.fromJson(body);
+      } else {
+        print('Failed to fetch designation: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching designation: $e');
+      return null;
+    }
+  }
+
+  // ✅ NEW OR UPDATED METHOD for fetching full details
+  Future<EmployeeDetails?> getFullEmployeeDetails(int employeeId) async {
+    // 1. Fetch the base Employee object (which contains the IDs)
+    final Employee? employee = await getEmployeeById(employeeId);
+
+    if (employee == null) {
+      return null;
+    }
+
+    // 2. Fetch Department and Designation concurrently
+    final departmentFuture = employee.departmentId != null
+        ? getDepartmentById(employee.departmentId!)
+        : Future<Department?>.value(null);
+
+    final designationFuture = employee.designationId != null
+        ? getDesignationById(employee.designationId!)
+        : Future<Designation?>.value(null);
+
+    final results = await Future.wait([departmentFuture, designationFuture]);
+
+    final Department? department = results[0] as Department?;
+    final Designation? designation = results[1] as Designation?;
+
+    // 3. Combine into the EmployeeDetails view model
+    return EmployeeDetails(
+      employee: employee,
+      department: department,
+      designation: designation,
+    );
+  }
+
 }

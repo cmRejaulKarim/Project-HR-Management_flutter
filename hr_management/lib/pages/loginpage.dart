@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hr_management/employee/employee_profile.dart';
+import 'package:hr_management/pages/employee/employee_profile.dart';
 import 'package:hr_management/pages/hr/accountant_dash.dart';
 import 'package:hr_management/pages/hr/admin_dashboard.dart';
 import 'package:hr_management/pages/department_page.dart';

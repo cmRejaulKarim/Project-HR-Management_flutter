@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hr_management/employee/employee_profile.dart';
+import 'package:hr_management/pages/employee/employee_profile.dart';
 import 'package:hr_management/entity/employee.dart';
 import 'package:hr_management/pages/sidebar.dart';
 import 'package:hr_management/service/auth_service.dart';
