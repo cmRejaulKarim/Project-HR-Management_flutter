@@ -19,9 +19,10 @@ class AdminDashboard extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.count(
-          crossAxisCount: 2, // 2 columns
+          crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
+          childAspectRatio: 0.85,
           children: [
             _buildDashboardCard(
               icon: Icons.people,

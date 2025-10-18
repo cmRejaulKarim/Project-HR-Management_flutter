@@ -56,8 +56,8 @@ class Sidebar extends StatelessWidget {
           _navItem(context, 'Admin Dashboard', '/adminProfile'),
           // ✅ Changed to _navItemWithProfile (uses push)
           _navItemWithProfile(context, 'View Profile'),
-          _navItem(context, 'View All Employees', '/viewAllEmp'),
-          _navItem(context, 'Department Employees', '/EmpByDept'),
+          _navItem(context, 'View All Employees', '/allEmp'),
+          _navItem(context, 'Department Employees', '/deptGroup'),
           _navItem(context, 'Holidays', '/viewHoliday'),
           _navItem(context, 'Yearly Sal Report', '/getYearSal'),
           _logout(context, 'Logout', '/logout'),

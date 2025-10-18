@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:hr_management/entity/department.dart';
 import 'package:hr_management/entity/designation.dart';
+import 'package:hr_management/entity/emp_group_by_dept_dto.dart';
 import 'package:hr_management/entity/employee_details_view.dart';
 import 'package:http/http.dart' as http;
 import 'package:hr_management/service/auth_service.dart';
@@ -127,17 +128,19 @@ class EmployeeService {
   }
 
   // Maps to: @GetMapping("/groupByDept")
-  Future<List<Map<String, dynamic>>> getEmployeesGroupedByDepartment() async {
+  Future<List<EmpGroupByDeptDTO>> getEmployeesGroupedByDepartment() async {
     final url = Uri.parse('$baseUrl/employee/groupByDept');
     final response = await http.get(url, headers: await _getAuthHeaders());
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = jsonDecode(response.body);
 
-      return jsonList.cast<Map<String, dynamic>>();
+      return jsonList
+          .map((e) => EmpGroupByDeptDTO.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     print(
-      'Failed to fetch employees grouped by department: ${response.statusCode}',
+      'Failed to fetch employees grouped by department: ${response.statusCode} - ${response.body}',
     );
     return [];
   }
@@ -230,5 +233,4 @@ class EmployeeService {
       // designation: designation,
     );
   }
-
 }
