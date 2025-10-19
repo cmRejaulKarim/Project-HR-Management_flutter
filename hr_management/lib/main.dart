@@ -6,6 +6,9 @@ import 'package:hr_management/pages/employee/all_employees_screen.dart';
 import 'package:hr_management/pages/employee/employee_by_department_page.dart';
 import 'package:hr_management/pages/holiday/holiday_add_screen.dart';
 import 'package:hr_management/pages/holiday/holiday_view_only.dart';
+import 'package:hr_management/pages/home_page.dart';
+import 'package:hr_management/pages/leave/all_approved_leaves.dart';
+import 'package:hr_management/pages/leave/dept_head_leaves.dart';
 import 'package:hr_management/pages/loginpage.dart';
 import 'package:hr_management/pages/department_page.dart';
 import 'package:hr_management/pages/registrationpage.dart';
@@ -25,7 +28,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       // Initial screen
-      initialRoute: '/login',
+      initialRoute: '/home',
 
       // Named routes
       routes: {
@@ -40,6 +43,9 @@ class MyApp extends StatelessWidget {
         '/deptEmp': (context) => DepartmentEmployees(),
         '/deptGroup': (context) => EmployeeByDepartmentPage(),
         '/allEmp': (context) => AllEmployeesScreen(),
+        '/home': (context) => HomePage(),
+        '/approvedLeaves': (context) => ApprovedLeavesPage(),
+        '/deptLeaves': (context) => DeptHeadLeavesPage(),
 
 
       },

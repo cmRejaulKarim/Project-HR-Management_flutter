@@ -13,74 +13,147 @@ class LoginPage extends StatelessWidget {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
 
-  // Note: storage is declared but not used in the provided methods
   final storage = new FlutterSecureStorage();
   AuthService authService = AuthService();
   EmployeeService employeeService = EmployeeService();
 
+  // Define a deep, rich color for the theme accents
+  final Color deepPrimary = Colors.indigo.shade800;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.all(16.00),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: email,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.email),
-              ),
+      // 1. Darker background for "deep color" effect
+      backgroundColor: Colors.blueGrey.shade900,
+      body: Center(
+        // Use SingleChildScrollView to prevent overflow when keyboard is visible
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 450, // Max width for the card on large screens
             ),
-
-            SizedBox(height: 20.0),
-
-            TextField(
-              controller: password,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.password),
+            child: Card(
+              // 2. Card view with elevation and rounded corners
+              color: Colors.white,
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
               ),
-              obscureText: true,
-            ),
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // --- Title Section ---
+                    Icon(
+                      Icons.lock_open,
+                      size: 60,
+                      color: deepPrimary,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Welcome to HRMS',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: deepPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
 
-            SizedBox(height: 20.0),
+                    // --- Email Input ---
+                    TextField(
+                      controller: email,
+                      // Styled Inputs
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        hintText: 'Enter your work email',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: BorderSide(color: deepPrimary, width: 2.0),
+                        ),
+                        prefixIcon: Icon(Icons.email, color: deepPrimary),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
 
-            ElevatedButton(
-              onPressed: () {
-                loginUser(context);
-              },
-              child: Text(
-                "Login",
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white, // Changed to white for better contrast
+                    const SizedBox(height: 20.0),
+
+                    // --- Password Input ---
+                    TextField(
+                      controller: password,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        hintText: 'Enter your password',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: BorderSide(color: deepPrimary, width: 2.0),
+                        ),
+                        prefixIcon: Icon(Icons.lock, color: deepPrimary),
+                      ),
+                      obscureText: true,
+                    ),
+
+                    const SizedBox(height: 30.0),
+
+                    // --- Login Button ---
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          loginUser(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          // Use the deep color for the button background
+                          backgroundColor: deepPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 15.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          elevation: 5,
+                        ),
+                        child: const Text(
+                          "Login",
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20.0),
+
+                    // --- Registration Link ---
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/registration');
+                      },
+                      child: Text(
+                        'New user? Register Here',
+                        style: TextStyle(
+                          color: deepPrimary,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                          decorationColor: deepPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-                // Removed deprecated 'foregroundColor: Colors.grey,' property
-              ),
             ),
-
-            SizedBox(height: 20.0),
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/registration');
-              },
-              child: Text(
-                'Registration',
-                style: TextStyle(
-                  color: Colors.purple,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

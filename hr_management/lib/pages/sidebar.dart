@@ -59,6 +59,8 @@ class Sidebar extends StatelessWidget {
           _navItem(context, 'View All Employees', '/allEmp'),
           _navItem(context, 'Department Employees', '/deptGroup'),
           _navItem(context, 'Holidays', '/viewHoliday'),
+          _navItem(context, 'DeptHead Leave Requests', '/deptLeaves'),
+          _navItem(context, 'All Approved Leaves', '/approvedLeaves'),
           _navItem(context, 'Yearly Sal Report', '/getYearSal'),
           _logout(context, 'Logout', '/logout'),
         ];

@@ -9,52 +9,80 @@ class AdminDashboard extends StatelessWidget {
 
   const AdminDashboard({super.key, required this.role, required this.profile});
 
-  @override
-  Widget build(BuildContext context) {
-    final _authService = AuthService();
+  // Helper to determine the appropriate greeting and emoji based on the current time.
+  (String greeting, String emoji) _getGreeting() {
+    final now = DateTime.now();
+    final hour = now.hour;
 
-    return Scaffold(
-      appBar: AppBar(title: Text("Admin Dashboard")),
-      drawer: Sidebar(role: role, profile: profile, authService: _authService),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.85,
+    if (hour >= 5 && hour < 12) {
+      return ('Good Morning', '☀️');
+    } else if (hour >= 12 && hour < 17) {
+      return ('Good Afternoon', '🌤️');
+    } else if (hour >= 17 && hour < 21) {
+      return ('Good Evening', '🌙');
+    } else {
+      return ('Good Night', '😴');
+    }
+  }
+
+  // Widget to build the stylish greeting card.
+  Widget _buildGreetingCard(BuildContext context) {
+    final (greeting, emoji) = _getGreeting();
+    // Using a cohesive color scheme, similar to the light green in the image
+    final Color accentColor = Colors.green.shade700;
+    final Color lightAccent = Colors.green.shade100;
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.only(bottom: 24.0), // Margin below the card
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _buildDashboardCard(
-              icon: Icons.people,
-              title: 'All Employees',
-              value: '150', // Replace with dynamic value
-              onTap: () {
-                // Navigate to employee list page
-              },
+            // Placeholder for the HRMS logo/icon
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: lightAccent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                'HRMS',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: accentColor,
+                  fontSize: 14,
+                ),
+              ),
             ),
-            _buildDashboardCard(
-              icon: Icons.hourglass_empty,
-              title: 'Pending Leave Requests',
-              value: '5', // Replace with dynamic value
-              onTap: () {
-                // Navigate to pending leave requests page
-              },
-            ),
-            _buildDashboardCard(
-              icon: Icons.check_circle,
-              title: 'Approved Leaves',
-              value: '20', // Replace with dynamic value
-              onTap: () {
-                // Navigate to approved leaves page
-              },
-            ),
-            _buildDashboardCard(
-              icon: Icons.attach_money,
-              title: 'Monthly Salary Report',
-              value: 'View',
-              onTap: () {
-                // Navigate to salary report page
-              },
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    // Display the greeting, profile name, and emoji
+                    '$greeting, ${profile.name} $emoji',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Have a productive day ahead!',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -62,6 +90,93 @@ class AdminDashboard extends StatelessWidget {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final _authService = AuthService();
+    final Color primaryColor = Theme.of(context).primaryColor;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Admin Dashboard", style: TextStyle(fontWeight: FontWeight.w600)),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      drawer: Sidebar(role: role, profile: profile, authService: _authService),
+      // Changed to ListView to ensure scrollability and stacking of widgets
+      body: ListView(
+        padding: const EdgeInsets.all(20.0),
+        children: [
+          // Display the new greeting card at the top
+          _buildGreetingCard(context),
+
+          // Note: The original GridView content is removed as requested,
+          // but you can add other dashboard components here as needed.
+          // For example, you can add simple statistics or quick links below the greeting.
+
+          // Example of adding a new section title (Optional)
+          const Padding(
+            padding: EdgeInsets.only(top: 8.0, bottom: 12.0),
+            child: Text(
+              "Quick Access & Analytics",
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87
+              ),
+            ),
+          ),
+
+          // Re-introducing the old cards in a single row for quick reference
+          Row(
+            children: [
+              Expanded(
+                child: _buildDashboardCard(
+                  icon: Icons.people,
+                  title: 'All Employees',
+                  value: '150', // Replace with dynamic value
+                  onTap: () {},
+                ),
+              ),
+              Expanded(
+                child: _buildDashboardCard(
+                  icon: Icons.hourglass_empty,
+                  title: 'Pending Leaves',
+                  value: '5', // Replace with dynamic value
+                  onTap: () {},
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Another row (Optional)
+          Row(
+            children: [
+              Expanded(
+                child: _buildDashboardCard(
+                  icon: Icons.check_circle,
+                  title: 'Approved Leaves',
+                  value: '20', // Replace with dynamic value
+                  onTap: () {},
+                ),
+              ),
+              Expanded(
+                child: _buildDashboardCard(
+                  icon: Icons.attach_money,
+                  title: 'Salary Report',
+                  value: 'View',
+                  onTap: () {},
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // The original dashboard card widget, now styled for a grid/row layout.
   Widget _buildDashboardCard({
     required IconData icon,
     required String title,
@@ -71,18 +186,26 @@ class AdminDashboard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        elevation: 4,
+        elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min, // Ensure card doesn't take full height
             children: [
-              Icon(icon, size: 40, color: Colors.blue),
-              const SizedBox(height: 16),
-              Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
-              Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Icon(icon, size: 36, color: Colors.indigo.shade700),
+              const SizedBox(height: 12),
+              Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)
+              ),
+              const SizedBox(height: 6),
+              Text(
+                  value,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.indigo.shade900)
+              ),
             ],
           ),
         ),

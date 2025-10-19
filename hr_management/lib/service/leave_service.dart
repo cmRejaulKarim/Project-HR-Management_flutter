@@ -256,7 +256,6 @@ class LeaveService {
     throw Exception("Failed to get yearly approved leave days");
   }
 
-  // Get leaves by status
   // Note: Your Spring Boot API has an endpoint for this: @GetMapping("status/{status}")
   Future<List<Leave>> getLeavesByStatus(String status) async {
     final headers = await getAuthHeaders();
