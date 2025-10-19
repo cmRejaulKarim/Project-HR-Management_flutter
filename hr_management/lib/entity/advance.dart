@@ -64,13 +64,6 @@ class AdvanceSalary {
     return {
       if (id != null) 'id': id,
 
-      // NOTE: For the POST /request endpoint, the employee field is NOT sent
-      // because the Spring Boot controller resolves the employee from the token.
-      // However, if this model is used for PUT/UPDATE where the employee field IS required, 
-      // we include it.
-
-      // For POST /request, this will be excluded, which is fine since Spring derives it.
-      // For PUT, this allows sending the minimal Employee structure.
       if (employeeJson != null) 'employee': employeeJson,
 
       'amount': amount,

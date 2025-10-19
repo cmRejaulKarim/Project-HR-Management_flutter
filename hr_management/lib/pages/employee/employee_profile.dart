@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hr_management/entity/department.dart';
-import 'package:hr_management/entity/designation.dart';
-
-// Assuming these imports resolve to your defined model classes
 import 'package:hr_management/entity/employee.dart';
 import 'package:hr_management/entity/advance.dart';
 import 'package:hr_management/entity/attendance.dart';
 import 'package:hr_management/entity/leave.dart';
-
-// Assuming these imports resolve to your defined service classes
 import 'package:hr_management/service/auth_service.dart';
 import 'package:hr_management/service/department_service.dart';
 import 'package:hr_management/service/designation_service.dart';
@@ -18,7 +12,6 @@ import 'package:hr_management/service/leave_service.dart';
 import 'package:hr_management/service/advance_service.dart';
 
 class EmployeeDashboard extends StatefulWidget {
-  // Required: The profile passed from the login page
   final Employee profile;
 
   const EmployeeDashboard({Key? key, required this.profile}) : super(key: key);
@@ -30,16 +23,13 @@ class EmployeeDashboard extends StatefulWidget {
 }
 
 class _EmployeeDashboardState extends State<EmployeeDashboard> {
-  // --- Service Instances ---
   final AuthService _authService = AuthService();
-  final EmployeeService _employeeService = EmployeeService();
   final AttendanceService _attendanceService = AttendanceService();
   final LeaveService _leaveService = LeaveService();
   final AdvanceService _advanceService = AdvanceService();
   final DepartmentService _departmentService = DepartmentService();
   final DesignationService _designationService = DesignationService();
 
-  // --- State Variables ---
   bool _isLoading = true;
   Attendance? _todayAttendance;
   List<Leave> _userLeaves = [];
@@ -88,25 +78,17 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       debugPrint('Profile Dept Object: ${widget.profile.department}');
       debugPrint('Profile Designation Object: ${widget.profile.designation}');
 
-      // Use the ID from the nested object (since we confirmed the object is null, this will be null)
       final int? deptId = widget.profile.departmentId;
       final int? desId = widget.profile.designationId;
 
-      // 💡 IMPORTANT: If your API is guaranteed to send the *ID* only when the object is null,
-      // you need a temporary variable to hold that ID during the initial Employee.fromJson call.
-      // For now, we only rely on the nested object's ID.
-
-      // Fetch Department Name
       if (deptId != null) {
         debugPrint('Attempting to fetch Department with ID: $deptId');
         final dept = await _departmentService.getDepartmentById(deptId);
         _departmentName = dept?.name ?? 'N/A (Fetch Failed)';
       } else {
-        // If the nested object itself is null (as per your log), we can't find the ID.
         _departmentName = 'N/A (ID Missing)';
       }
 
-      // Fetch Designation Name
       if (desId != null) {
         debugPrint('Attempting to fetch Designation with ID: $desId');
         final des = await _designationService.getDesignationById(desId);

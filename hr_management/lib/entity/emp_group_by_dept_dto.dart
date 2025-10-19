@@ -2,8 +2,6 @@
 
 import '../entity/employee.dart'; // Import your existing Employee model
 
-// Assuming a simplified User model for the departmentHead
-// If you have a full User model, use that.
 class DepartmentHead {
   final int id;
   final String name;
