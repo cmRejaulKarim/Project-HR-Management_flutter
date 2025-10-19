@@ -128,6 +128,7 @@ class _SalaryListPageState extends State<SalaryListPage> {
             onPressed: _resetAndRefetch,
           ),
         ],
+        backgroundColor: Theme.of(context).highlightColor,
       ),
 
       body: FutureBuilder<List<Salary>>(

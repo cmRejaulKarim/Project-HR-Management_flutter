@@ -14,10 +14,14 @@ class Employee {
   final String? joiningDate;
   final String? phone;
   final double? basicSalary;
-  final double? allowance; // ✅ ADDED: Field for allowance
+  final double? allowance;
   final bool? active;
 
-  // ✅ UPDATED: Store the full nested objects
+  // Fields to capture the raw IDs sent by the API
+  final int? departmentId;
+  final int? designationId;
+
+  // Fields for the full nested objects (will be null with your current JSON)
   final Department? department;
   final Designation? designation;
 
@@ -32,10 +36,14 @@ class Employee {
     this.joiningDate,
     this.phone,
     this.basicSalary,
-    this.allowance, // Added to constructor
+    this.allowance,
     this.active,
-    this.department, // Added to constructor
-    this.designation, // Added to constructor
+    // Add raw ID fields to the constructor
+    this.departmentId,
+    this.designationId,
+    // Keep nested objects
+    this.department,
+    this.designation,
   });
 
   factory Employee.fromJson(Map<String, dynamic> json) {
@@ -47,9 +55,17 @@ class Employee {
       return null;
     }
 
-    // Fallback to ID-only if the value is an int (e.g., from a list DTO)
-    // NOTE: If you need to retrieve the ID from a simple list endpoint,
-    // you should create a separate, leaner EmployeeListItem model instead.
+    // 💡 NEW: Helper to safely extract an ID if the value is a number (int or double)
+    int? _parseId(dynamic data) {
+      if (data is num) {
+        return data.toInt();
+      }
+      return null;
+    }
+
+    // Capture the ID directly from the "department" and "designation" keys
+    final int? rawDeptId = _parseId(json['department']);
+    final int? rawDesId = _parseId(json['designation']);
 
     return Employee(
       id: json['id'] as int,
@@ -64,17 +80,20 @@ class Employee {
 
       // Handle numeric conversion safely
       basicSalary: (json['basicSalary'] as num?)?.toDouble(),
-      allowance: (json['allowance'] as num?)?.toDouble(), // ✅ PARSED allowance
+      allowance: (json['allowance'] as num?)?.toDouble(),
       active: json['active'] as bool?,
 
-      // ✅ Handle nested objects (Department/Designation)
+      // 💡 Store the raw IDs, which came directly from the JSON
+      departmentId: rawDeptId,
+      designationId: rawDesId,
+
+      // Attempt to parse nested objects (will return null with your current JSON)
+      // This is kept for compatibility if the API changes later.
       department: _parseNested(json['department'], Department.fromJson),
       designation: _parseNested(json['designation'], Designation.fromJson),
     );
   }
 
-  // NOTE: When sending data back to Spring, you typically only send IDs if needed, 
-  // or a specific DTO map. This toJson sends nulls for complex objects.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -84,9 +103,9 @@ class Employee {
       if (address != null) 'address': address,
       if (gender != null) 'gender': gender,
       if (dateOfBirth != null) 'dateOfBirth': dateOfBirth,
-      // If sending back, usually only the ID is needed for related entities
-      if (department != null) 'departmentId': department!.id,
-      if (designation != null) 'designationId': designation!.id,
+      // 💡 Use the stored raw IDs for toJson if the nested object is null
+      'departmentId': department?.id ?? departmentId,
+      'designationId': designation?.id ?? designationId,
       if (joiningDate != null) 'joiningDate': joiningDate,
       if (phone != null) 'phone': phone,
       if (basicSalary != null) 'basicSalary': basicSalary,

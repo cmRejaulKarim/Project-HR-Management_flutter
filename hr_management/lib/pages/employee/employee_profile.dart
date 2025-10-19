@@ -44,8 +44,8 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
   Attendance? _todayAttendance;
   List<Leave> _userLeaves = [];
   List<AdvanceSalary> _userAdvances = [];
-  String _departmentName = 'N/A';
-  String _designationName = 'N/A';
+  String _departmentName = '';
+  String _designationName = '';
 
   // Forms Controllers
   final TextEditingController _advanceAmountController =
@@ -85,25 +85,35 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       debugPrint('Loading advances...');
       final advances = await _advanceService.viewAdvanceRequestsByEmp();
 
-      if (widget.profile.department != null) {
-        final allDepts = await _departmentService.getAllDepartments();
-        final dept = allDepts?.firstWhere(
-          (d) => d.id == widget.profile.department,
-          orElse: () => Department(id: -1, name: 'Unknown Department'),
-        );
-        _departmentName = dept?.name ?? 'N/A';
+      debugPrint('Profile Dept Object: ${widget.profile.department}');
+      debugPrint('Profile Designation Object: ${widget.profile.designation}');
 
-        // Fetch designations for the specific department to get the name
-        if (widget.profile.designation != null) {
-          final desgs = await _designationService.getAllDesignations();
-          final desg = desgs!.firstWhere(
-            (d) => d.id == widget.profile.designation,
-            orElse: () => Designation(id: -1, name: 'Unknown Designation'),
-          );
-          _designationName = desg.name;
-        }
+      // Use the ID from the nested object (since we confirmed the object is null, this will be null)
+      final int? deptId = widget.profile.departmentId;
+      final int? desId = widget.profile.designationId;
+
+      // 💡 IMPORTANT: If your API is guaranteed to send the *ID* only when the object is null,
+      // you need a temporary variable to hold that ID during the initial Employee.fromJson call.
+      // For now, we only rely on the nested object's ID.
+
+      // Fetch Department Name
+      if (deptId != null) {
+        debugPrint('Attempting to fetch Department with ID: $deptId');
+        final dept = await _departmentService.getDepartmentById(deptId);
+        _departmentName = dept?.name ?? 'N/A (Fetch Failed)';
+      } else {
+        // If the nested object itself is null (as per your log), we can't find the ID.
+        _departmentName = 'N/A (ID Missing)';
       }
 
+      // Fetch Designation Name
+      if (desId != null) {
+        debugPrint('Attempting to fetch Designation with ID: $desId');
+        final des = await _designationService.getDesignationById(desId);
+        _designationName = des?.name ?? 'N/A (Fetch Failed)';
+      } else {
+        _designationName = 'N/A (ID Missing)';
+      }
       setState(() {
         _todayAttendance = attendance;
         _userLeaves = leaves;
@@ -147,10 +157,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     }
 
     try {
-      final success = await _advanceService.addAdvanceRequest(
-        amount,
-        reason,
-      );
+      final success = await _advanceService.addAdvanceRequest(amount, reason);
 
       if (success != null) {
         // Dismiss dialog

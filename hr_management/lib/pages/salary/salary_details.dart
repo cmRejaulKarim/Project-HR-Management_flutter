@@ -110,6 +110,8 @@ class SalaryDetailScreen extends StatelessWidget {
               // Deductions Section
               pw.Text('Deductions', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
               pw.Divider(),
+              _buildPdfRow('Leave Days', '${salary.totalMonthlyLeave} days', color: PdfColors.red700),
+              _buildPdfRow('Leave Penalty', '${salary.leavePenalty.toStringAsFixed(2)}', color: PdfColors.red700),
               _buildPdfRow('Absence Days', '${salary.totalMonthlyAbsence} days', color: PdfColors.red700),
               _buildPdfRow('Absence Penalty', '${salary.absencePenalty.toStringAsFixed(2)}', color: PdfColors.red700),
               _buildPdfRow('Advance Deduction', '${salary.advanceDeduction.toStringAsFixed(2)}', color: PdfColors.red700),
@@ -201,6 +203,8 @@ class SalaryDetailScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const Divider(),
+                _buildDetailRow('Leave Days', '${salary.totalMonthlyLeave} days', color: Colors.red),
+                _buildDetailRow('Leave Penalty', '৳${salary.leavePenalty.toStringAsFixed(2)}', color: Colors.red),
                 _buildDetailRow('Absence Days', '${salary.totalMonthlyAbsence} days', color: Colors.red),
                 _buildDetailRow('Absence Penalty', '৳${salary.absencePenalty.toStringAsFixed(2)}', color: Colors.red),
                 _buildDetailRow('Advance Deduction', '৳${salary.advanceDeduction.toStringAsFixed(2)}', color: Colors.red),

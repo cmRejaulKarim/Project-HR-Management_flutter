@@ -3,6 +3,7 @@ import 'package:hr_management/entity/employee.dart';
 
 class Salary {
   final int id;
+  // This assumes the employee_id in the DB is mapped to a nested Employee object
   final Employee employee;
   final String month;
   final double basicSalary;
@@ -11,6 +12,8 @@ class Salary {
   final double totalSalary;
   final double advanceDeduction;
   final double absencePenalty;
+  // 🆕 Added 'leavePenalty' based on the 'leave_penalty' DB column
+  final double leavePenalty;
   final double netPay;
   final int? totalMonthlyOverTimeHour;
   final int totalMonthlyLeave;
@@ -27,8 +30,10 @@ class Salary {
     required this.totalSalary,
     required this.advanceDeduction,
     required this.absencePenalty,
+    // 🆕 Required in constructor
+    required this.leavePenalty,
     required this.netPay,
-    required this.totalMonthlyOverTimeHour, // Changed to nullable
+    required this.totalMonthlyOverTimeHour, // Nullable as per the bigint type in DB and your previous model
     required this.totalMonthlyLeave,
     required this.totalMonthlyAbsence,
     required this.submitDate,
@@ -42,10 +47,17 @@ class Salary {
       return 0.0;
     }
 
+    // Safely parse the 'employee' field, assuming it's nested
+    final employeeJson = json['employee'];
+    final Employee employeeObject = employeeJson != null && employeeJson is Map<String, dynamic>
+        ? Employee.fromJson(employeeJson)
+    // Fallback for cases where employee might be a simple ID or null
+    // You might need a more robust handling depending on your API response.
+        : throw ArgumentError('Employee data is missing or invalid.');
+
     return Salary(
       id: json['id'] as int,
-      // Ensure your Employee model's fromJson handles the entire nested structure
-      employee: Employee.fromJson(json['employee'] as Map<String, dynamic>),
+      employee: employeeObject,
       month: json['month'] as String,
       basicSalary: parseDouble(json['basicSalary']),
       allowance: parseDouble(json['allowance']),
@@ -53,8 +65,10 @@ class Salary {
       totalSalary: parseDouble(json['totalSalary']),
       advanceDeduction: parseDouble(json['advanceDeduction']),
       absencePenalty: parseDouble(json['absencePenalty']),
+      // 🆕 Added parsing for 'leavePenalty'
+      leavePenalty: parseDouble(json['leavePenalty']),
       netPay: parseDouble(json['netPay']),
-      // ✅ Using 'as int?' to correctly handle 'null' in the JSON
+      // Correctly handle the nullable 'totalMonthlyOverTimeHour'
       totalMonthlyOverTimeHour: json['totalMonthlyOverTimeHour'] as int?,
       totalMonthlyLeave: json['totalMonthlyLeave'] as int,
       totalMonthlyAbsence: json['totalMonthlyAbsence'] as int,
