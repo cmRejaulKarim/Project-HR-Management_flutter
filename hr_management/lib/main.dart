@@ -13,6 +13,7 @@ import 'package:hr_management/pages/loginpage.dart';
 import 'package:hr_management/pages/department_page.dart';
 import 'package:hr_management/pages/registrationpage.dart';
 import 'package:hr_management/pages/leave/view_leave_request.dart';
+import 'package:hr_management/pages/salary_sheet.dart';
 
 void main() {
   runApp(const MyApp());
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomePage(),
         '/approvedLeaves': (context) => ApprovedLeavesPage(),
         '/deptLeaves': (context) => DeptHeadLeavesPage(),
+        '/sal': (context) => SalaryListPage(),
 
 
       },

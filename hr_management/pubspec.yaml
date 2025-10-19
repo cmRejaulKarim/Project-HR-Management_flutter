@@ -50,6 +50,8 @@ dependencies:
   path: ^1.9.1
   http_parser: ^4.0.0
   mime: ^2.0.0
+  pdf: ^3.7.3 # Or latest version
+  printing: ^5.10.1 # For previewing, printing, and sharing the PDF
 
 
 

@@ -661,7 +661,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
 
                     return ListTile(
                       leading: Icon(Icons.attach_money, color: statusColor),
-                      title: Text('\$${advance.amount.toStringAsFixed(2)}'),
+                      title: Text('৳${advance.amount.toStringAsFixed(2)}'),
                       subtitle: Text(
                         'Requested: ${advance.requestDate}\nReason: ${advance.reason ?? 'N/A'}',
                       ),
@@ -874,7 +874,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                     controller: _advanceAmountController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
-                      labelText: 'Amount (\$)',
+                      labelText: 'Amount (৳)',
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.payments),
                     ),

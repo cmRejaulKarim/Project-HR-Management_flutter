@@ -61,7 +61,7 @@ class Sidebar extends StatelessWidget {
           _navItem(context, 'Holidays', '/viewHoliday'),
           _navItem(context, 'DeptHead Leave Requests', '/deptLeaves'),
           _navItem(context, 'All Approved Leaves', '/approvedLeaves'),
-          _navItem(context, 'Yearly Sal Report', '/getYearSal'),
+          _navItem(context, 'Salary', '/sal'),
           _logout(context, 'Logout', '/logout'),
         ];
       case 'DEPARTMENT_HEAD':
@@ -83,7 +83,7 @@ class Sidebar extends StatelessWidget {
           _navItem(context, 'Holiday Management', '/addHoliday'),
           _navItem(context, 'Holidays', '/viewHoliday'),
           _navItem(context, 'Advance Salary Requests', '/advance'),
-          _navItem(context, 'View Monthly Salary', '/createSal'),
+          _navItem(context, 'Salary', '/sal'),
           _logout(context, 'Logout', '/logout'),
         ];
       default:

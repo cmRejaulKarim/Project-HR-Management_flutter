@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Import for ByteData/Uint8List
 import 'package:hr_management/entity/advance.dart';
 import 'package:hr_management/service/advance_service.dart';
+
+// Import the PDF packages
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 // Define a file-level constant for the responsive breakpoint
 const double _kTabletBreakpoint = 600.0;
@@ -16,13 +22,16 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
   final AdvanceService _advanceService = AdvanceService();
   late Future<List<AdvanceSalary>> _futureAdvances;
 
+  // State variable for the current filter
+  String _currentFilter = 'ALL'; // Can be 'ALL', 'PENDING', 'APPROVED', 'REJECTED'
+
   @override
   void initState() {
     super.initState();
     _futureAdvances = _fetchAdvances();
   }
 
-  // Method to fetch and sort the advances (unchanged)
+  // Method to fetch and sort the advances
   Future<List<AdvanceSalary>> _fetchAdvances() async {
     final advances = await _advanceService.viewAllAdvanceRequests();
     advances.sort((a, b) => b.requestDate.compareTo(a.requestDate));
@@ -96,8 +105,150 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
     );
   }
 
-  // --- Large Screen (DataTable) Widget (unchanged) ---
+  // -------------------------------------------------------------------
+  // ⭐️ PDF Download Logic - FULL IMPLEMENTATION
+  // -------------------------------------------------------------------
+  Future<void> _downloadApprovedPdf(List<AdvanceSalary> allAdvances) async {
+    final approvedAdvances = allAdvances.where((a) => a.status == 'APPROVED').toList();
+
+    if (approvedAdvances.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('❌ No approved requests to download.')),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('⏳ Generating PDF...')),
+    );
+
+    try {
+      final pdf = pw.Document(title: "Approved Advance Requests");
+
+      // Prepare the data for the PDF table
+      final headers = ['ID', 'Employee', 'Amount (৳)', 'Reason', 'Requested Date'];
+      final data = approvedAdvances.map((advance) {
+        final employeeName = advance.employee != null && advance.employee is Map
+            ? advance.employee['name'] ?? 'N/A'
+            : 'N/A';
+
+        return [
+          advance.id.toString(),
+          employeeName,
+          advance.amount.toStringAsFixed(2),
+          advance.reason ?? 'N/A',
+          advance.requestDate,
+        ];
+      }).toList();
+
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4.portrait, //u can Use landscape for more columns
+          header: (pw.Context context) {
+            return pw.Center(
+              child: pw.Text(
+                'Approved Advance Requests Report',
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 18),
+              ),
+            );
+          },
+          build: (pw.Context context) {
+            return [
+              pw.SizedBox(height: 10),
+              pw.Text('Total Approved Requests: ${approvedAdvances.length}', style: const pw.TextStyle(fontSize: 12)),
+              pw.SizedBox(height: 10),
+              pw.Table.fromTextArray(
+                headers: headers,
+                data: data,
+                border: pw.TableBorder.all(color: PdfColors.grey),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+                headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey700),
+                cellHeight: 30,
+                cellAlignments: {
+                  0: pw.Alignment.centerLeft,
+                  1: pw.Alignment.centerLeft,
+                  2: pw.Alignment.centerRight,
+                  3: pw.Alignment.centerLeft,
+                  4: pw.Alignment.center,
+                },
+              ),
+            ];
+          },
+        ),
+      );
+
+      // Use the printing package to share/save the PDF file
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'approved_advances_${DateTime.now().toIso8601String().substring(0, 10)}.pdf'
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('✅ PDF download initiated successfully.')),
+      );
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error generating PDF: $e')),
+      );
+    }
+  }
+
+  // --- Widget for Download Button ---
+  Widget _buildDownloadButton(List<AdvanceSalary> advances) {
+    if (advances.isEmpty) return const SizedBox.shrink();
+
+    return IconButton(
+      icon: const Icon(Icons.download),
+      tooltip: 'Download Approved Requests PDF',
+      onPressed: () => _downloadApprovedPdf(advances),
+    );
+  }
+
+  // --- Widget for Filter Dropdown ---
+  Widget _buildFilterDropdown() {
+    final List<String> statuses = ['ALL', 'PENDING', 'APPROVED', 'REJECTED'];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _currentFilter,
+          icon: const Icon(Icons.filter_list, color: Colors.white),
+          style: const TextStyle(color: Colors.black),
+          dropdownColor: Colors.white,
+          onChanged: (String? newValue) {
+            if (newValue != null) {
+              setState(() {
+                _currentFilter = newValue; // Update the filter state
+              });
+            }
+          },
+          items: statuses.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                'Show ${value == 'ALL' ? 'All' : value}',
+                style: const TextStyle(color: Colors.black),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  // --- Large Screen (DataTable) Widget (MODIFIED for filtering) ---
   Widget _buildDataTable(List<AdvanceSalary> advances) {
+    // Filter the list before building the table
+    final filteredAdvances = advances.where((advance) {
+      return _currentFilter == 'ALL' || advance.status == _currentFilter;
+    }).toList();
+
+    if (filteredAdvances.isEmpty) {
+      return Center(child: Text('No requests found for the selected filter: $_currentFilter.'));
+    }
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
@@ -110,7 +261,7 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
           DataColumn(label: Text('Status')),
           DataColumn(label: Text('Action')),
         ],
-        rows: advances.map((advance) {
+        rows: filteredAdvances.map((advance) { // Use filteredAdvances
           final employeeName = advance.employee != null && advance.employee is Map
               ? advance.employee['name'] ?? 'N/A'
               : 'N/A';
@@ -120,7 +271,7 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
             cells: [
               DataCell(Text(advance.id.toString())),
               DataCell(Text(employeeName)),
-              DataCell(Text('\$${advance.amount.toStringAsFixed(2)}')),
+              DataCell(Text('৳${advance.amount.toStringAsFixed(2)}')),
               DataCell(Text(advance.reason ?? '')),
               DataCell(Text(advance.requestDate)),
               DataCell(_buildStatusText(advance.status)),
@@ -149,12 +300,21 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
     );
   }
 
-  // --- Small Screen (List View) Widget (unchanged) ---
+  // --- Small Screen (List View) Widget (MODIFIED for filtering) ---
   Widget _buildListView(List<AdvanceSalary> advances) {
+    // Filter the list before building the ListView
+    final filteredAdvances = advances.where((advance) {
+      return _currentFilter == 'ALL' || advance.status == _currentFilter;
+    }).toList();
+
+    if (filteredAdvances.isEmpty) {
+      return Center(child: Text('No requests found for the selected filter: $_currentFilter.'));
+    }
+
     return ListView.builder(
-      itemCount: advances.length,
+      itemCount: filteredAdvances.length,
       itemBuilder: (context, index) {
-        final advance = advances[index];
+        final advance = filteredAdvances[index]; // Use filteredAdvances
         final employeeName = advance.employee != null && advance.employee is Map
             ? advance.employee['name'] ?? 'N/A'
             : 'N/A';
@@ -185,7 +345,7 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
                 ),
                 const Divider(height: 10),
                 // Details
-                Text('Amount: \$${advance.amount.toStringAsFixed(2)}'),
+                Text('Amount: ৳${advance.amount.toStringAsFixed(2)}'),
                 Text('Requested: ${advance.requestDate}'),
                 Text('Reason: ${advance.reason ?? 'N/A'}'),
 
@@ -228,6 +388,19 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('All Advance Requests'),
+        actions: [
+          // The FutureBuilder ensures we pass the full list of data to the download button
+          FutureBuilder<List<AdvanceSalary>>(
+            future: _futureAdvances,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return _buildDownloadButton(snapshot.data!);
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          _buildFilterDropdown(),
+        ],
       ),
       body: FutureBuilder<List<AdvanceSalary>>(
         future: _futureAdvances,
@@ -244,14 +417,14 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
 
           final advances = snapshot.data!;
 
-          // Use LayoutBuilder to determine which layout to show based on width
+          // Use LayoutBuilder for responsiveness
           return LayoutBuilder(
             builder: (context, constraints) {
               if (constraints.maxWidth > _kTabletBreakpoint) {
-                // Wide screen (Tablet landscape, Desktop)
+                // Wide screen
                 return _buildDataTable(advances);
               } else {
-                // Narrow screen (Mobile, Tablet portrait)
+                // Narrow screen
                 return _buildListView(advances);
               }
             },
