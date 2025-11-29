@@ -60,9 +60,9 @@ This repository displays the various screens designed for a comprehensive Human 
 | **All Approved Leaves**    | List of all approved leave requests (Admin).       | ![Admin All Approved Leaves](./UI/AdminAllApprovedLeaves.png)     |
 | **Dept Head Leave Mgt**    | Leave requests management for Department Head.     | ![Dept Head Leave Management](./UI/DeptHeadLeave.png)          |
 | **Employee Leave Request** | Screen for an employee to request a leave.         | ![Employee Leave Requests](./UI/EmpRequests.png)                  |
-| **Admin All Advances**     | List of all advance/loan requests (Admin view).    | ![Accountant All Advance Requests](./UI/AccountantAllAdvanceRequests.png)   |
+| **Accountant All Advances**     | List of all advance requests (Admin view).    | ![Accountant All Advance Requests](./UI/AccountantAllAdvanceRequests.png)   |
 | **Approved Advances**      | List of approved advance requests (Admin view).    | ![Accountant Approved Advance Requests](./UI/AccountantApprovedAdvance.png) |
-| **Advance Request (Emp)**  | Screen for an employee to request an advance/loan. | ![Employee Advance Request](./UI/EmpAdvance.png)                  |
+| **Advance Request (Emp)**  | Screen for an employee to request an advance. | ![Employee Advance Request](./UI/EmpAdvance.png)                  |
 
 ---
 
