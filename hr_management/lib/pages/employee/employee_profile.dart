@@ -6,7 +6,6 @@ import 'package:hr_management/entity/leave.dart';
 import 'package:hr_management/service/auth_service.dart';
 import 'package:hr_management/service/department_service.dart';
 import 'package:hr_management/service/designation_service.dart';
-import 'package:hr_management/service/employee_service.dart';
 import 'package:hr_management/service/attendance_service.dart';
 import 'package:hr_management/service/leave_service.dart';
 import 'package:hr_management/service/advance_service.dart';
