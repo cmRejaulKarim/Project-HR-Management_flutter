@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hr_management/entity/leave.dart';
 import 'package:hr_management/service/leave_service.dart';
 
-// NOTE: Minimal Employee model for UI compilation (replace with your actual entity/employee.dart)
 class Employee {
   final String name;
+
   Employee({required this.name});
 
-  // Method to safely map the dynamic employee data from the Leave model
   factory Employee.fromDynamic(dynamic data) {
     if (data is Map<String, dynamic> && data.containsKey('name')) {
       return Employee(name: data['name'] as String);
@@ -29,14 +28,25 @@ class _ApprovedLeavesPageState extends State<ApprovedLeavesPage> {
 
   // State for filtering
   List<Leave> _allLeaves = [];
+
   // Initialize to 'All Months' so it explicitly shows all data by default.
   String? _selectedMonth = 'All Months';
 
   // List of all 12 months for the dropdown
   final List<String> _months = [
     'All Months',
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   @override
@@ -46,9 +56,9 @@ class _ApprovedLeavesPageState extends State<ApprovedLeavesPage> {
     _allApprovedLeavesFuture = _leaveService.getLeavesByStatus('APPROVED');
   }
 
-  // Client-side filtering logic
+  // filtering logic
   List<Leave> _getFilteredLeaves() {
-    // Check for 'All Months' explicitly
+    // Check for 'All Months'
     if (_selectedMonth == 'All Months' || _selectedMonth == null) {
       return _allLeaves;
     }
@@ -76,7 +86,10 @@ class _ApprovedLeavesPageState extends State<ApprovedLeavesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Approved Leaves', style: TextStyle(fontWeight: FontWeight.w600)),
+        title: const Text(
+          'All Approved Leaves',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
       ),
@@ -84,12 +97,20 @@ class _ApprovedLeavesPageState extends State<ApprovedLeavesPage> {
         children: [
           // --- Month Filter Dropdown ---
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Filter by Month',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                prefixIcon: const Icon(Icons.calendar_today, color: Colors.teal),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                prefixIcon: const Icon(
+                  Icons.calendar_today,
+                  color: Colors.teal,
+                ),
               ),
               // Use _selectedMonth as the value, which defaults to 'All Months'
               value: _selectedMonth,
@@ -182,12 +203,21 @@ class _ApprovedLeavesPageState extends State<ApprovedLeavesPage> {
                     return Card(
                       elevation: 3,
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       child: ListTile(
-                        leading: const Icon(Icons.check_circle, color: Colors.teal, size: 30),
+                        leading: const Icon(
+                          Icons.check_circle,
+                          color: Colors.teal,
+                          size: 30,
+                        ),
                         title: Text(
                           employee.name, // Use the extracted employee name
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                         subtitle: Text(
                           'Reason: ${leave.reason}\nDates: ${leave.startDate} to ${leave.endDate} (${leave.totalLeaveDays} days)',

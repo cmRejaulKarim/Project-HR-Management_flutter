@@ -54,7 +54,7 @@ class Sidebar extends StatelessWidget {
       case 'ADMIN':
         return [
           _navItem(context, 'Admin Dashboard', '/adminProfile'),
-          // ✅ Changed to _navItemWithProfile (uses push)
+          //Changed to _navItemWithProfile (uses push)
           _navItemWithProfile(context, 'View Profile'),
           _navItem(context, 'View All Employees', '/allEmp'),
           _navItem(context, 'Department Employees', '/deptGroup'),
@@ -67,7 +67,7 @@ class Sidebar extends StatelessWidget {
       case 'DEPARTMENT_HEAD':
         return [
           _navItem(context, 'Dept Head Dashboard', '/deptHeadProfile'),
-          // ✅ Changed to _navItemWithProfile (uses push)
+          //Changed to _navItemWithProfile (uses push)
           _navItemWithProfile(context, 'View Profile'),
           _navItem(context, 'Leave Request', '/dLeave'),
           _navItem(context, 'All Employees', '/deptEmp'),
@@ -78,7 +78,7 @@ class Sidebar extends StatelessWidget {
       case 'ACCOUNTANT':
         return [
           _navItem(context, 'Accountant Dashboard', '/accountantProfile'),
-          // ✅ Changed to _navItemWithProfile (uses push)
+          //Changed to _navItemWithProfile (uses push)
           _navItemWithProfile(context, 'View Profile'),
           _navItem(context, 'Holiday Management', '/addHoliday'),
           _navItem(context, 'Holidays', '/viewHoliday'),

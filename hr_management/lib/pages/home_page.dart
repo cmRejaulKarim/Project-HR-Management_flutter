@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 
-// Assuming you have defined the routes in your main.dart as shown
-// and LoginPage, Registration are imported and accessible.
-
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   // Custom Color from the image (light green/mint)
-  static const Color primaryLightColor = Color(0xFFE8F5E9); // A light green for background
-  static const Color primaryDarkColor = Color(0xFF388E3C); // A dark green for text/buttons
+  static const Color primaryLightColor = Color(0xFFE8F5E9);
+  static const Color primaryDarkColor = Color(0xFF388E3C);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +21,9 @@ class HomePage extends StatelessWidget {
           backgroundColor: Colors.white,
           elevation: 0,
           title: Padding(
-            padding: EdgeInsets.symmetric(horizontal: isLargeScreen ? 60.0 : 0.0),
+            padding: EdgeInsets.symmetric(
+              horizontal: isLargeScreen ? 60.0 : 0.0,
+            ),
             child: Row(
               children: <Widget>[
                 const Text(
@@ -104,14 +103,21 @@ class HomePage extends StatelessWidget {
                       Navigator.of(context).pushNamed('/registration');
                     },
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: primaryDarkColor, backgroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      foregroundColor: primaryDarkColor,
+                      backgroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 15,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                         side: const BorderSide(color: primaryDarkColor),
                       ),
                       elevation: 0,
-                      textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      textStyle: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     child: const Text('Join Us'),
                   ),
@@ -121,7 +127,10 @@ class HomePage extends StatelessWidget {
 
             // --- Footer/Security Section (White Background) ---
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 20.0),
+              padding: const EdgeInsets.symmetric(
+                vertical: 40.0,
+                horizontal: 20.0,
+              ),
               child: Wrap(
                 spacing: 20.0,
                 runSpacing: 20.0,
@@ -161,9 +170,7 @@ class HomePage extends StatelessWidget {
         foregroundColor: primaryDarkColor,
         side: const BorderSide(color: primaryDarkColor, width: 2),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6.0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.0)),
       ),
       child: const Text(
         'Sign In',
@@ -179,11 +186,10 @@ class HomePage extends StatelessWidget {
         Navigator.of(context).pushNamed('/registration');
       },
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white, backgroundColor: primaryDarkColor,
+        foregroundColor: Colors.white,
+        backgroundColor: primaryDarkColor,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6.0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.0)),
       ),
       child: const Text(
         'Sign Up',
@@ -193,7 +199,11 @@ class HomePage extends StatelessWidget {
   }
 
   // Helper method to build the security/compliance cards
-  Widget _buildSecurityCard(BuildContext context, {required IconData icon, required String text}) {
+  Widget _buildSecurityCard(
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
       decoration: BoxDecoration(
@@ -234,9 +244,7 @@ class HomePage extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            decoration: const BoxDecoration(
-              color: primaryLightColor,
-            ),
+            decoration: const BoxDecoration(color: primaryLightColor),
             child: const Text(
               'HRMS Navigation',
               style: TextStyle(
@@ -248,20 +256,35 @@ class HomePage extends StatelessWidget {
           ),
           _buildDrawerItem(context, 'Home', Icons.home, '/home'),
           _buildDrawerItem(context, 'About', Icons.info_outline, '/'),
-          _buildDrawerItem(context, 'Services', Icons.business_center_outlined, '/'),
-          _buildDrawerItem(context, 'Contact', Icons.contact_mail_outlined, '/'),
+          _buildDrawerItem(
+            context,
+            'Services',
+            Icons.business_center_outlined,
+            '/',
+          ),
+          _buildDrawerItem(
+            context,
+            'Contact',
+            Icons.contact_mail_outlined,
+            '/',
+          ),
         ],
       ),
     );
   }
 
   // Helper method for drawer list tiles
-  Widget _buildDrawerItem(BuildContext context, String title, IconData icon, String route) {
+  Widget _buildDrawerItem(
+    BuildContext context,
+    String title,
+    IconData icon,
+    String route,
+  ) {
     return ListTile(
       leading: Icon(icon, color: primaryDarkColor),
       title: Text(title),
       onTap: () {
-        Navigator.pop(context); // Close the drawer
+        Navigator.pop(context);
         if (route.isNotEmpty && route != '/') {
           Navigator.of(context).pushNamed(route);
         }

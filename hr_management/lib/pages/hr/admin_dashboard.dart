@@ -76,10 +76,7 @@ class AdminDashboard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     'Have a productive day ahead!',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                   ),
                 ],
               ),
@@ -97,7 +94,10 @@ class AdminDashboard extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Admin Dashboard", style: TextStyle(fontWeight: FontWeight.w600)),
+        title: const Text(
+          "Admin Dashboard",
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -110,31 +110,25 @@ class AdminDashboard extends StatelessWidget {
           // Display the new greeting card at the top
           _buildGreetingCard(context),
 
-          // Note: The original GridView content is removed as requested,
-          // but you can add other dashboard components here as needed.
-          // For example, you can add simple statistics or quick links below the greeting.
-
-          // Example of adding a new section title (Optional)
           const Padding(
             padding: EdgeInsets.only(top: 8.0, bottom: 12.0),
             child: Text(
               "Quick Access & Analytics",
               style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
             ),
           ),
 
-          // Re-introducing the old cards in a single row for quick reference
           Row(
             children: [
               Expanded(
                 child: _buildDashboardCard(
                   icon: Icons.people,
                   title: 'All Employees',
-                  value: '150', // Replace with dynamic value
+                  value: '150',
                   onTap: () {},
                 ),
               ),
@@ -142,7 +136,7 @@ class AdminDashboard extends StatelessWidget {
                 child: _buildDashboardCard(
                   icon: Icons.hourglass_empty,
                   title: 'Pending Leaves',
-                  value: '5', // Replace with dynamic value
+                  value: '5',
                   onTap: () {},
                 ),
               ),
@@ -150,14 +144,13 @@ class AdminDashboard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Another row (Optional)
           Row(
             children: [
               Expanded(
                 child: _buildDashboardCard(
                   icon: Icons.check_circle,
                   title: 'Approved Leaves',
-                  value: '20', // Replace with dynamic value
+                  value: '20',
                   onTap: () {},
                 ),
               ),
@@ -176,7 +169,6 @@ class AdminDashboard extends StatelessWidget {
     );
   }
 
-  // The original dashboard card widget, now styled for a grid/row layout.
   Widget _buildDashboardCard({
     required IconData icon,
     required String title,
@@ -192,19 +184,27 @@ class AdminDashboard extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min, // Ensure card doesn't take full height
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 36, color: Colors.indigo.shade700),
               const SizedBox(height: 12),
               Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
-                  value,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.indigo.shade900)
+                value,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.indigo.shade900,
+                ),
               ),
             ],
           ),

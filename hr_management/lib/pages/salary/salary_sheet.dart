@@ -36,13 +36,12 @@ class _SalaryListPageState extends State<SalaryListPage> {
     });
   }
 
-  // Filter Dropdown Widget (Styled for AppBar)
+  // Filter Dropdown Widget
   Widget _buildFilterDropdown() {
     final now = DateTime.now();
     final List<Map<String, int?>> filterOptions = [
-      {'year': null, 'month': null}, // Option 1: ALL
+      {'year': null, 'month': null},
     ];
-    // Add options for the last 6 months
     for (int i = 0; i < 6; i++) {
       int year = now.year;
       int month = now.month - i;
@@ -69,7 +68,10 @@ class _SalaryListPageState extends State<SalaryListPage> {
         icon: const Icon(Icons.filter_alt),
         // Use theme colors for better integration
         dropdownColor: Theme.of(context).cardColor,
-        style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 16),
+        style: TextStyle(
+          color: Theme.of(context).textTheme.bodyLarge?.color,
+          fontSize: 16,
+        ),
 
         items: filterOptions.map((option) {
           final displayValue = _getDisplayText(option);
@@ -80,11 +82,11 @@ class _SalaryListPageState extends State<SalaryListPage> {
           return DropdownMenuItem(
             value: selectValue,
             child: Text(
-                displayValue,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
-                )
+              displayValue,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
           );
         }).toList(),
@@ -163,7 +165,7 @@ class _SalaryListPageState extends State<SalaryListPage> {
                     onPressed: _resetAndRefetch,
                     icon: const Icon(Icons.refresh),
                     label: const Text('Clear Filter / Retry'),
-                  )
+                  ),
                 ],
               ),
             );
@@ -182,7 +184,10 @@ class _SalaryListPageState extends State<SalaryListPage> {
                 elevation: 2,
                 margin: const EdgeInsets.symmetric(vertical: 6.0),
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
 
                   title: Text(
                     employeeName,
@@ -219,7 +224,8 @@ class _SalaryListPageState extends State<SalaryListPage> {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => SalaryDetailScreen(salary: salary),
+                        builder: (context) =>
+                            SalaryDetailScreen(salary: salary),
                       ),
                     );
                   },

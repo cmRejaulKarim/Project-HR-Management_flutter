@@ -122,13 +122,10 @@ class AuthService {
     final token = prefs.getString('authToken');
 
     if (token == null) {
-      // Already logged out or token not found
       return;
     }
 
-    final url = Uri.parse(
-      '$baseUrl/auth/logout',
-    ); // Replace with your actual URL
+    final url = Uri.parse('$baseUrl/auth/logout');
 
     try {
       final response = await http.post(
@@ -148,7 +145,6 @@ class AuthService {
       print('Logout error: $e');
     }
 
-    // Clear token and user role from local storage regardless of API response
     await prefs.remove('authToken');
     await prefs.remove('userRole');
   }

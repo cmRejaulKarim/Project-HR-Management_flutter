@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hr_management/entity/AttendanceMonthlySummary.dart';
 import 'package:hr_management/entity/attendance.dart';
@@ -12,12 +11,10 @@ class AttendanceByDept extends StatefulWidget {
   const AttendanceByDept({super.key});
 
   @override
-  State<AttendanceByDept> createState() =>
-      _AttendanceByDeptState();
+  State<AttendanceByDept> createState() => _AttendanceByDeptState();
 }
 
-class _AttendanceByDeptState
-    extends State<AttendanceByDept> {
+class _AttendanceByDeptState extends State<AttendanceByDept> {
   final AttendanceService _attendanceService = AttendanceService();
   final EmployeeService _employeeService = EmployeeService();
 
@@ -40,14 +37,14 @@ class _AttendanceByDeptState
 
     _initializeData();
   }
+
   void _initializeData() async {
     // 1. Fetch the necessary employee ID -> Name LIST first
-    final List<Employee> employees = await _employeeService.getEmployeesByDept();
+    final List<Employee> employees = await _employeeService
+        .getEmployeesByDept();
 
     // 2. Convert the list into the required Map<int, String>
-    final Map<int, String> map = {
-      for (var emp in employees) emp.id: emp.name
-    };
+    final Map<int, String> map = {for (var emp in employees) emp.id: emp.name};
 
     // 3. Set state and initialize futures
     setState(() {
@@ -67,8 +64,16 @@ class _AttendanceByDeptState
   // --- Helper Widgets ---
 
   Widget _buildLogStatus(bool? absent) {
-    String text = absent == true ? 'Absent' : absent == false ? 'Present' : 'N/A';
-    Color color = absent == true ? Colors.red : absent == false ? Colors.green : Colors.grey;
+    String text = absent == true
+        ? 'Absent'
+        : absent == false
+        ? 'Present'
+        : 'N/A';
+    Color color = absent == true
+        ? Colors.red
+        : absent == false
+        ? Colors.green
+        : Colors.grey;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -77,7 +82,11 @@ class _AttendanceByDeptState
       ),
       child: Text(
         text,
-        style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
       ),
     );
   }
@@ -100,10 +109,11 @@ class _AttendanceByDeptState
             const Divider(),
             if (logs.isEmpty)
               const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(24.0),
-                    child: Text('No attendance logs recorded for today.'),
-                  ))
+                child: Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: Text('No attendance logs recorded for today.'),
+                ),
+              )
             else if (width > _kBreakpoint)
               _buildTodayLogDataTable(logs)
             else
@@ -128,14 +138,14 @@ class _AttendanceByDeptState
         rows: logs
             .map(
               (log) => DataRow(
-            cells: [
-              DataCell(Text(_getEmpName(log.empId))),
-              DataCell(Text(log.checkIn ?? 'Not yet')),
-              DataCell(Text(log.checkOut ?? 'Not yet')),
-              DataCell(_buildLogStatus(log.absent)),
-            ],
-          ),
-        )
+                cells: [
+                  DataCell(Text(_getEmpName(log.empId))),
+                  DataCell(Text(log.checkIn ?? 'Not yet')),
+                  DataCell(Text(log.checkOut ?? 'Not yet')),
+                  DataCell(_buildLogStatus(log.absent)),
+                ],
+              ),
+            )
             .toList(),
       ),
     );
@@ -150,7 +160,10 @@ class _AttendanceByDeptState
         final log = logs[index];
         return ListTile(
           leading: const Icon(Icons.person, color: Colors.blueGrey),
-          title: Text(_getEmpName(log.empId), style: const TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(
+            _getEmpName(log.empId),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -166,7 +179,10 @@ class _AttendanceByDeptState
 
   // --- 2. Monthly Summary Section Builder ---
 
-  Widget _buildMonthlySummary(List<AttendanceMonthlySummary> summaries, double width) {
+  Widget _buildMonthlySummary(
+    List<AttendanceMonthlySummary> summaries,
+    double width,
+  ) {
     return Card(
       elevation: 4,
       margin: const EdgeInsets.all(16.0),
@@ -182,10 +198,11 @@ class _AttendanceByDeptState
             const Divider(),
             if (summaries.isEmpty)
               const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(24.0),
-                    child: Text('No monthly summary data available.'),
-                  ))
+                child: Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: Text('No monthly summary data available.'),
+                ),
+              )
             else if (width > _kBreakpoint)
               _buildMonthlySummaryDataTable(summaries)
             else
@@ -196,7 +213,9 @@ class _AttendanceByDeptState
     );
   }
 
-  Widget _buildMonthlySummaryDataTable(List<AttendanceMonthlySummary> summaries) {
+  Widget _buildMonthlySummaryDataTable(
+    List<AttendanceMonthlySummary> summaries,
+  ) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
@@ -212,23 +231,40 @@ class _AttendanceByDeptState
         rows: summaries
             .map(
               (summary) => DataRow(
-            cells: [
-              DataCell(Text(_getEmpName(summary.empId))),
-              DataCell(Text('${summary.totalDays}')),
-              DataCell(Text('${summary.presents}', style: const TextStyle(color: Colors.green))),
-              DataCell(Text('${summary.absents}', style: const TextStyle(color: Colors.red))),
-              DataCell(Text('${summary.lates}', style: const TextStyle(color: Colors.orange))),
-              // Since totalOvertimeHours is an int, display it directly
-              DataCell(Text('${summary.totalOvertimeHours}')),
-            ],
-          ),
-        )
+                cells: [
+                  DataCell(Text(_getEmpName(summary.empId))),
+                  DataCell(Text('${summary.totalDays}')),
+                  DataCell(
+                    Text(
+                      '${summary.presents}',
+                      style: const TextStyle(color: Colors.green),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      '${summary.absents}',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      '${summary.lates}',
+                      style: const TextStyle(color: Colors.orange),
+                    ),
+                  ),
+                  // Since totalOvertimeHours is an int, display it directly
+                  DataCell(Text('${summary.totalOvertimeHours}')),
+                ],
+              ),
+            )
             .toList(),
       ),
     );
   }
 
-  Widget _buildMonthlySummaryListView(List<AttendanceMonthlySummary> summaries) {
+  Widget _buildMonthlySummaryListView(
+    List<AttendanceMonthlySummary> summaries,
+  ) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -245,17 +281,28 @@ class _AttendanceByDeptState
               children: [
                 Text(
                   _getEmpName(summary.empId),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 const Divider(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _buildSummaryStat('Days', summary.totalDays, Colors.grey),
-                    _buildSummaryStat('Presents', summary.presents, Colors.green),
+                    _buildSummaryStat(
+                      'Presents',
+                      summary.presents,
+                      Colors.green,
+                    ),
                     _buildSummaryStat('Absents', summary.absents, Colors.red),
                     _buildSummaryStat('Lates', summary.lates, Colors.orange),
-                    _buildSummaryStat('OT Hrs', summary.totalOvertimeHours, Colors.blue),
+                    _buildSummaryStat(
+                      'OT Hrs',
+                      summary.totalOvertimeHours,
+                      Colors.blue,
+                    ),
                   ],
                 ),
               ],
@@ -287,7 +334,9 @@ class _AttendanceByDeptState
   @override
   Widget build(BuildContext context) {
     // Show loading spinner until the employee map is loaded
-    if (_employeeMap.isEmpty || _futureTodayLog == null || _futureMonthlySummary == null) {
+    if (_employeeMap.isEmpty ||
+        _futureTodayLog == null ||
+        _futureMonthlySummary == null) {
       return const Scaffold(
         appBar: CupertinoAppBar(title: Text('Department Attendance Dashboard')),
         body: Center(child: CircularProgressIndicator()),
@@ -313,14 +362,18 @@ class _AttendanceByDeptState
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(50.0),
-                            child: CircularProgressIndicator(),
-                          ));
+                        child: Padding(
+                          padding: EdgeInsets.all(50.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
                     }
                     if (snapshot.hasError) {
                       return Center(
-                          child: Text('Error loading today\'s log: ${snapshot.error}'));
+                        child: Text(
+                          'Error loading today\'s log: ${snapshot.error}',
+                        ),
+                      );
                     }
                     final logs = snapshot.data ?? [];
                     return _buildTodayLog(logs, width);
@@ -333,15 +386,18 @@ class _AttendanceByDeptState
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(50.0),
-                            child: CircularProgressIndicator(),
-                          ));
+                        child: Padding(
+                          padding: EdgeInsets.all(50.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
                     }
                     if (snapshot.hasError) {
                       return Center(
-                          child: Text(
-                              'Error loading monthly summary: ${snapshot.error}'));
+                        child: Text(
+                          'Error loading monthly summary: ${snapshot.error}',
+                        ),
+                      );
                     }
                     final summaries = snapshot.data ?? [];
                     return _buildMonthlySummary(summaries, width);
@@ -359,6 +415,7 @@ class _AttendanceByDeptState
 // Simple AppBar replacement for use in the loading state
 class CupertinoAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget title;
+
   const CupertinoAppBar({super.key, required this.title});
 
   @override

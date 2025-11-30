@@ -1,5 +1,3 @@
-// lib/ui/all_employees_screen.dart (UPDATED)
-
 import 'package:flutter/material.dart';
 import 'package:hr_management/entity/employee.dart';
 import 'package:hr_management/pages/employee/employee_details.dart';
@@ -22,37 +20,35 @@ class _AllEmployeesScreenState extends State<AllEmployeesScreen> {
     _employeesFuture = _employeeService.getAllEmployees();
   }
 
-  // Helper method to construct the full image URL
   String? _getPhotoUrl(Employee employee) {
     final photo = employee.photo;
     if (photo != null && photo.isNotEmpty) {
-      // NOTE: Ensure this URL matches your Spring Boot file serving configuration!
       return 'http://localhost:8085/images/employee/$photo';
     }
     return null;
   }
 
-  // ✅ Navigation handler
+  //Navigation handler
   void _navigateToEmployeeDetails(Employee employee) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        // Pass the basic employee object to the detail screen
         builder: (context) => EmployeeDetailScreen(employee: employee),
       ),
     );
   }
 
-  // Method to build a single Employee Card
+  // Employee Card
   Widget _buildEmployeeCard(Employee employee) {
     final photoUrl = _getPhotoUrl(employee);
-    final initials = employee.name.isNotEmpty ? employee.name[0].toUpperCase() : '?';
+    final initials = employee.name.isNotEmpty
+        ? employee.name[0].toUpperCase()
+        : '?';
 
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        // ✅ Call the navigation method when the card is tapped
         onTap: () => _navigateToEmployeeDetails(employee),
 
         child: Padding(
@@ -60,7 +56,7 @@ class _AllEmployeesScreenState extends State<AllEmployeesScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // 1. Employee Photo/Avatar
+              // 1. Employee Photo
               CircleAvatar(
                 radius: 35,
                 backgroundColor: Colors.indigo.shade200,
@@ -69,9 +65,13 @@ class _AllEmployeesScreenState extends State<AllEmployeesScreen> {
                     : null,
                 child: photoUrl == null
                     ? Text(
-                  initials,
-                  style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
-                )
+                        initials,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
                     : null,
               ),
               const SizedBox(height: 10),
@@ -80,7 +80,10 @@ class _AllEmployeesScreenState extends State<AllEmployeesScreen> {
               Text(
                 employee.name,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -102,13 +105,17 @@ class _AllEmployeesScreenState extends State<AllEmployeesScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: employee.active == true ? Colors.green.shade100 : Colors.red.shade100,
+                  color: employee.active == true
+                      ? Colors.green.shade100
+                      : Colors.red.shade100,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   employee.active == true ? 'Active' : 'Inactive',
                   style: TextStyle(
-                    color: employee.active == true ? Colors.green.shade800 : Colors.red.shade800,
+                    color: employee.active == true
+                        ? Colors.green.shade800
+                        : Colors.red.shade800,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -136,7 +143,9 @@ class _AllEmployeesScreenState extends State<AllEmployeesScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error loading employees: ${snapshot.error}'));
+            return Center(
+              child: Text('Error loading employees: ${snapshot.error}'),
+            );
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No employees found.'));

@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hr_management/pages/employee/employee_profile.dart';
 import 'package:hr_management/entity/department.dart';
 import 'package:hr_management/entity/employee.dart';
-// Note: Leave import can be removed if no leave data/logic remains.
-// import 'package:hr_management/entity/leave.dart';
 import 'package:hr_management/pages/sidebar.dart';
 import 'package:hr_management/service/auth_service.dart';
 import 'package:hr_management/service/department_service.dart';
-// Note: LeaveService import can be removed if no leave data/logic remains.
-// import 'package:hr_management/service/leave_service.dart';
 
 class DeptHeadDashboard extends StatefulWidget {
   final String role;
@@ -25,8 +21,6 @@ class DeptHeadDashboard extends StatefulWidget {
 }
 
 class _DeptHeadDashboardState extends State<DeptHeadDashboard> {
-  // Removed _leavesFuture and related LeaveService fields
-  // final LeaveService _leaveService = LeaveService();
   final AuthService _authService = AuthService();
   final DepartmentService _departmentService = DepartmentService();
 
@@ -36,14 +30,15 @@ class _DeptHeadDashboardState extends State<DeptHeadDashboard> {
   void initState() {
     super.initState();
     _fetchDepartmentName();
-    // Removed _fetchLeaves() call
   }
 
-  // --- Data Fetching Logic (Only for Dept Name) ---
+  //Data for Dept Name
 
   void _fetchDepartmentName() async {
     if (widget.profile.department != null) {
-      Department? dept = await _departmentService.getDepartmentById(widget.profile.department!.id);
+      Department? dept = await _departmentService.getDepartmentById(
+        widget.profile.department!.id,
+      );
       if (dept != null) {
         setState(() {
           _departmentName = dept.name;
@@ -55,24 +50,15 @@ class _DeptHeadDashboardState extends State<DeptHeadDashboard> {
   }
 
   void _navigateToMyProfile() {
-    if (_departmentName == null ) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile details are still loading. Please wait.')),
-      );
-      return;
-    }
-
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EmployeeDashboard(
-          profile: widget.profile,
-        ),
+        builder: (context) => EmployeeDashboard(profile: widget.profile),
       ),
     );
   }
 
-  // --- Widget Builder ---
+  //Widget Builder
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +66,6 @@ class _DeptHeadDashboardState extends State<DeptHeadDashboard> {
       appBar: AppBar(
         title: const Text("Department Head Dashboard"),
         backgroundColor: Colors.blue.shade700,
-        // Removed Refresh IconButton
       ),
       drawer: Sidebar(
         role: widget.role,
@@ -94,11 +79,7 @@ class _DeptHeadDashboardState extends State<DeptHeadDashboard> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.account_tree,
-                size: 80,
-                color: Colors.blueGrey,
-              ),
+              const Icon(Icons.account_tree, size: 80, color: Colors.blueGrey),
               const SizedBox(height: 20),
               Text(
                 'Welcome, ${widget.profile.name ?? 'Department Head'}!',
@@ -112,34 +93,35 @@ class _DeptHeadDashboardState extends State<DeptHeadDashboard> {
               Text(
                 'You are the Head of ${_departmentName ?? 'Loading Department...'}',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey.shade700,
-                ),
+                style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
               ),
               const SizedBox(height: 40),
 
-              // BUTTON 1: View OWN Employee Profile
+              // BUTTON 1: View OWN Profile
               ElevatedButton.icon(
-                onPressed: _navigateToMyProfile, // <-- New routing function
+                onPressed: _navigateToMyProfile,
                 icon: const Icon(Icons.person),
                 label: const Text('View My Profile'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueGrey,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 15,
+                  ),
                   textStyle: const TextStyle(fontSize: 16),
                 ),
               ),
               const SizedBox(height: 20),
 
-
-              // Placeholder for navigation to the separate Leave Management Page
+              // BUTTON 2: navigation to Leave
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.pushNamed(context, '/dLeave');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Navigate to Leave Management Page...')),
+                    const SnackBar(
+                      content: Text('Navigate to Leave Management Page...'),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.list_alt),
@@ -147,7 +129,10 @@ class _DeptHeadDashboardState extends State<DeptHeadDashboard> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 15,
+                  ),
                   textStyle: const TextStyle(fontSize: 16),
                 ),
               ),

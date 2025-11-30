@@ -5,8 +5,6 @@ import 'package:hr_management/entity/emp_group_by_dept_dto.dart';
 import 'package:hr_management/entity/employee_details_view.dart';
 import 'package:http/http.dart' as http;
 import 'package:hr_management/service/auth_service.dart';
-
-// Import the Employee model so the service can return a concrete type
 import 'package:hr_management/entity/employee.dart';
 
 class EmployeeService {
@@ -81,7 +79,6 @@ class EmployeeService {
     if (response.statusCode == 200) {
       final Map<String, dynamic> json = jsonDecode(response.body);
 
-      // ✅ FIX: Convert the JSON map into an Employee object using the factory constructor
       return Employee.fromJson(json);
     } else {
       print('Failed to fetch employee profile: ${response.body}');
@@ -203,7 +200,7 @@ class EmployeeService {
     }
   }
 
-  // ✅ NEW OR UPDATED METHOD for fetching full details
+  //NEW OR UPDATED METHOD for fetching full details
   Future<EmployeeDetails?> getFullEmployeeDetails(int employeeId) async {
     // 1. Fetch the base Employee object (which contains the IDs)
     final Employee? employee = await getEmployeeById(employeeId);

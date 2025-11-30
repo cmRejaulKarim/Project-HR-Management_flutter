@@ -4,8 +4,7 @@ import 'package:hr_management/entity/holiday.dart';
 import 'package:hr_management/service/auth_service.dart';
 
 class HolidayService {
-  final String baseUrl =
-      'http://localhost:8085/api/holiday'; // Adjust as needed
+  final String baseUrl = 'http://localhost:8085/api/holiday';
   final AuthService _authService = AuthService();
 
   Future<Map<String, String>> _getHeaders() async {

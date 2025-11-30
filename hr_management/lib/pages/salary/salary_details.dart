@@ -9,7 +9,6 @@ class SalaryDetailScreen extends StatelessWidget {
 
   const SalaryDetailScreen({super.key, required this.salary});
 
-  // Helper to safely get the name from a nested object (Designation/Department)
   String _getName(dynamic entity) {
     if (entity != null) {
       return entity.name;
@@ -17,7 +16,6 @@ class SalaryDetailScreen extends StatelessWidget {
     return 'N/A';
   }
 
-  // Helper to build Flutter UI Detail Row (UNCHANGED)
   Widget _buildDetailRow(String label, String value, {Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
@@ -38,7 +36,7 @@ class SalaryDetailScreen extends StatelessWidget {
     );
   }
 
-  // ⭐️ NEW: PDF Generation Function
+  //PDF Generation Function
   Future<void> _generatePdf(BuildContext context) async {
     final pdf = pw.Document();
 
@@ -60,7 +58,9 @@ class SalaryDetailScreen extends StatelessWidget {
               value,
               style: pw.TextStyle(
                 fontSize: 10,
-                fontWeight: color != null ? pw.FontWeight.bold : pw.FontWeight.normal,
+                fontWeight: color != null
+                    ? pw.FontWeight.bold
+                    : pw.FontWeight.normal,
                 color: color,
               ),
             ),
@@ -80,13 +80,22 @@ class SalaryDetailScreen extends StatelessWidget {
               pw.Center(
                 child: pw.Text(
                   'PAYSLIP - $payPeriod',
-                  style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+                  style: pw.TextStyle(
+                    fontSize: 18,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
                 ),
               ),
               pw.SizedBox(height: 20),
 
               // Employee Details
-              pw.Text('Employee Details', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                'Employee Details',
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
               pw.Divider(),
               _buildPdfRow('Name', employeeName),
               _buildPdfRow('Department', departmentName),
@@ -94,35 +103,91 @@ class SalaryDetailScreen extends StatelessWidget {
               pw.SizedBox(height: 15),
 
               // Earnings Section
-              pw.Text('Earnings', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                'Earnings',
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
               pw.Divider(),
-              _buildPdfRow('Basic Salary', '${salary.basicSalary.toStringAsFixed(2)}'),
-              _buildPdfRow('Allowance', '${salary.allowance.toStringAsFixed(2)}'),
-              _buildPdfRow('Overtime Hours', '${salary.totalMonthlyOverTimeHour ?? 0} hrs'),
-              _buildPdfRow('Overtime Pay', '${salary.overtimeSalary.toStringAsFixed(2)}', color: PdfColors.green700),
+              _buildPdfRow(
+                'Basic Salary',
+                '${salary.basicSalary.toStringAsFixed(2)}',
+              ),
+              _buildPdfRow(
+                'Allowance',
+                '${salary.allowance.toStringAsFixed(2)}',
+              ),
+              _buildPdfRow(
+                'Overtime Hours',
+                '${salary.totalMonthlyOverTimeHour ?? 0} hrs',
+              ),
+              _buildPdfRow(
+                'Overtime Pay',
+                '${salary.overtimeSalary.toStringAsFixed(2)}',
+                color: PdfColors.green700,
+              ),
 
               // Gross Salary
               pw.Divider(thickness: 1.5),
-              _buildPdfRow('Gross Salary', '${salary.totalSalary.toStringAsFixed(2)}', color: PdfColors.blue700),
+              _buildPdfRow(
+                'Gross Salary',
+                '${salary.totalSalary.toStringAsFixed(2)}',
+                color: PdfColors.blue700,
+              ),
               pw.Divider(thickness: 1.5),
               pw.SizedBox(height: 15),
 
               // Deductions Section
-              pw.Text('Deductions', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                'Deductions',
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
               pw.Divider(),
-              _buildPdfRow('Leave Days', '${salary.totalMonthlyLeave} days', color: PdfColors.red700),
-              _buildPdfRow('Leave Penalty', '${salary.leavePenalty.toStringAsFixed(2)}', color: PdfColors.red700),
-              _buildPdfRow('Absence Days', '${salary.totalMonthlyAbsence} days', color: PdfColors.red700),
-              _buildPdfRow('Absence Penalty', '${salary.absencePenalty.toStringAsFixed(2)}', color: PdfColors.red700),
-              _buildPdfRow('Advance Deduction', '${salary.advanceDeduction.toStringAsFixed(2)}', color: PdfColors.red700),
+              _buildPdfRow(
+                'Leave Days',
+                '${salary.totalMonthlyLeave} days',
+                color: PdfColors.red700,
+              ),
+              _buildPdfRow(
+                'Leave Penalty',
+                '${salary.leavePenalty.toStringAsFixed(2)}',
+                color: PdfColors.red700,
+              ),
+              _buildPdfRow(
+                'Absence Days',
+                '${salary.totalMonthlyAbsence} days',
+                color: PdfColors.red700,
+              ),
+              _buildPdfRow(
+                'Absence Penalty',
+                '${salary.absencePenalty.toStringAsFixed(2)}',
+                color: PdfColors.red700,
+              ),
+              _buildPdfRow(
+                'Advance Deduction',
+                '${salary.advanceDeduction.toStringAsFixed(2)}',
+                color: PdfColors.red700,
+              ),
 
               // Net Pay
               pw.Divider(thickness: 2),
-              _buildPdfRow('NET PAYABLE', '${salary.netPay.toStringAsFixed(2)}', color: PdfColors.deepPurple700),
+              _buildPdfRow(
+                'NET PAYABLE',
+                '${salary.netPay.toStringAsFixed(2)}',
+                color: PdfColors.deepPurple700,
+              ),
               pw.Divider(thickness: 2),
 
               pw.Spacer(),
-              pw.Text('Generated on: ${DateTime.now().toString().substring(0, 10)}', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey)),
+              pw.Text(
+                'Generated on: ${DateTime.now().toString().substring(0, 10)}',
+                style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey),
+              ),
             ],
           );
         },
@@ -130,12 +195,14 @@ class SalaryDetailScreen extends StatelessWidget {
     );
 
     // Use the printing package to display the PDF preview and printing options
-    await Printing.sharePdf(bytes: await pdf.save(), filename: 'payslip_${employeeName}_$payPeriod.pdf');
+    await Printing.sharePdf(
+      bytes: await pdf.save(),
+      filename: 'payslip_${employeeName}_$payPeriod.pdf',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Safely extract employee role information using the helper method
     final designationName = _getName(salary.employee.designation);
     final departmentName = _getName(salary.employee.department);
 
@@ -145,7 +212,7 @@ class SalaryDetailScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
         actions: [
-          // ⭐️ ADD PDF ACTION BUTTON
+          //ADD PDF ACTION BUTTON
           IconButton(
             icon: const Icon(Icons.picture_as_pdf),
             onPressed: () => _generatePdf(context),
@@ -155,7 +222,6 @@ class SalaryDetailScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        // ... (rest of the UI body remains the same) ...
         child: Card(
           elevation: 4,
           child: Padding(
@@ -173,7 +239,9 @@ class SalaryDetailScreen extends StatelessWidget {
                 // Employee Role Information
                 Text(
                   '👤 Employee Details',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 _buildDetailRow('Designation', designationName),
                 _buildDetailRow('Department', departmentName),
@@ -183,31 +251,71 @@ class SalaryDetailScreen extends StatelessWidget {
                 // Earnings Section
                 Text(
                   '💰 Earnings',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const Divider(),
-                _buildDetailRow('Basic Salary', '৳${salary.basicSalary.toStringAsFixed(2)}'),
-                _buildDetailRow('Allowance', '৳${salary.allowance.toStringAsFixed(2)}'),
-                // Safely handle nullable totalMonthlyOverTimeHour
-                _buildDetailRow('Overtime Hours', '${salary.totalMonthlyOverTimeHour ?? 0} hrs'),
-                _buildDetailRow('Overtime Pay', '৳${salary.overtimeSalary.toStringAsFixed(2)}', color: Colors.green.shade700),
+                _buildDetailRow(
+                  'Basic Salary',
+                  '৳${salary.basicSalary.toStringAsFixed(2)}',
+                ),
+                _buildDetailRow(
+                  'Allowance',
+                  '৳${salary.allowance.toStringAsFixed(2)}',
+                ),
+                _buildDetailRow(
+                  'Overtime Hours',
+                  '${salary.totalMonthlyOverTimeHour ?? 0} hrs',
+                ),
+                _buildDetailRow(
+                  'Overtime Pay',
+                  '৳${salary.overtimeSalary.toStringAsFixed(2)}',
+                  color: Colors.green.shade700,
+                ),
 
                 // Total Before Deductions
                 const Divider(height: 20, thickness: 2),
-                _buildDetailRow('Gross Salary', '৳${salary.totalSalary.toStringAsFixed(2)}', color: Colors.blue),
+                _buildDetailRow(
+                  'Gross Salary',
+                  '৳${salary.totalSalary.toStringAsFixed(2)}',
+                  color: Colors.blue,
+                ),
                 const Divider(height: 20, thickness: 2),
 
                 // Deductions Section
                 Text(
                   '💸 Deductions',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const Divider(),
-                _buildDetailRow('Leave Days', '${salary.totalMonthlyLeave} days', color: Colors.red),
-                _buildDetailRow('Leave Penalty', '৳${salary.leavePenalty.toStringAsFixed(2)}', color: Colors.red),
-                _buildDetailRow('Absence Days', '${salary.totalMonthlyAbsence} days', color: Colors.red),
-                _buildDetailRow('Absence Penalty', '৳${salary.absencePenalty.toStringAsFixed(2)}', color: Colors.red),
-                _buildDetailRow('Advance Deduction', '৳${salary.advanceDeduction.toStringAsFixed(2)}', color: Colors.red),
+                _buildDetailRow(
+                  'Leave Days',
+                  '${salary.totalMonthlyLeave} days',
+                  color: Colors.red,
+                ),
+                _buildDetailRow(
+                  'Leave Penalty',
+                  '৳${salary.leavePenalty.toStringAsFixed(2)}',
+                  color: Colors.red,
+                ),
+                _buildDetailRow(
+                  'Absence Days',
+                  '${salary.totalMonthlyAbsence} days',
+                  color: Colors.red,
+                ),
+                _buildDetailRow(
+                  'Absence Penalty',
+                  '৳${salary.absencePenalty.toStringAsFixed(2)}',
+                  color: Colors.red,
+                ),
+                _buildDetailRow(
+                  'Advance Deduction',
+                  '৳${salary.advanceDeduction.toStringAsFixed(2)}',
+                  color: Colors.red,
+                ),
 
                 // Final Net Pay
                 const Divider(height: 20, thickness: 3, color: Colors.black),

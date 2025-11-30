@@ -1,6 +1,4 @@
-// lib/model/emp_group_by_dept_dto.dart
-
-import '../entity/employee.dart'; // Import your existing Employee model
+import '../entity/employee.dart';
 
 class DepartmentHead {
   final int id;
@@ -21,7 +19,7 @@ class DepartmentHead {
 class EmpGroupByDeptDTO {
   final int departmentId;
   final String departmentName;
-  final DepartmentHead? departmentHead; // Can be null as per your JSON
+  final DepartmentHead? departmentHead;
   final List<Employee> employees;
 
   EmpGroupByDeptDTO({
@@ -32,13 +30,13 @@ class EmpGroupByDeptDTO {
   });
 
   factory EmpGroupByDeptDTO.fromJson(Map<String, dynamic> json) {
-    // Safely parse departmentHead
     DepartmentHead? head;
     if (json['departmentHead'] != null) {
-      head = DepartmentHead.fromJson(json['departmentHead'] as Map<String, dynamic>);
+      head = DepartmentHead.fromJson(
+        json['departmentHead'] as Map<String, dynamic>,
+      );
     }
 
-    // Parse the list of employees
     final List<dynamic> employeeList = json['employees'] as List<dynamic>;
     final List<Employee> employees = employeeList
         .map((e) => Employee.fromJson(e as Map<String, dynamic>))

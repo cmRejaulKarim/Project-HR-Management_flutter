@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import for ByteData/Uint8List
+import 'package:flutter/services.dart';
 import 'package:hr_management/entity/advance.dart';
 import 'package:hr_management/service/advance_service.dart';
-
-// Import the PDF packages
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-// Define a file-level constant for the responsive breakpoint
 const double _kTabletBreakpoint = 600.0;
 
 class AdvanceRequestListPage extends StatefulWidget {
@@ -22,8 +19,7 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
   final AdvanceService _advanceService = AdvanceService();
   late Future<List<AdvanceSalary>> _futureAdvances;
 
-  // State variable for the current filter
-  String _currentFilter = 'ALL'; // Can be 'ALL', 'PENDING', 'APPROVED', 'REJECTED'
+  String _currentFilter = 'ALL';
 
   @override
   void initState() {
@@ -44,23 +40,27 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
     final actionText = isApprove ? "Approve" : "Reject";
 
     // 1. Show confirmation dialog
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('$actionText Request?'),
-        content: Text('Are you sure you want to $actionText advance request ID: $id?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+    final confirmed =
+        await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('$actionText Request?'),
+            content: Text(
+              'Are you sure you want to $actionText advance request ID: $id?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(actionText),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(actionText),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
 
     if (!confirmed) return;
 
@@ -75,7 +75,9 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
     // 3. Update UI and show feedback
     if (updatedAdvance != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Advance request ID $id ${actionText}d successfully.')),
+        SnackBar(
+          content: Text('Advance request ID $id ${actionText}d successfully.'),
+        ),
       );
       // Refresh the entire list
       setState(() {
@@ -83,7 +85,9 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to $actionText advance request ID $id.')),
+        SnackBar(
+          content: Text('Failed to $actionText advance request ID $id.'),
+        ),
       );
     }
   }
@@ -98,18 +102,17 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
     }
     return Text(
       status,
-      style: TextStyle(
-        color: color,
-        fontWeight: FontWeight.bold,
-      ),
+      style: TextStyle(color: color, fontWeight: FontWeight.bold),
     );
   }
 
   // -------------------------------------------------------------------
-  // ⭐️ PDF Download Logic - FULL IMPLEMENTATION
+  // PDF Download Logic - FULL IMPLEMENTATION
   // -------------------------------------------------------------------
   Future<void> _downloadApprovedPdf(List<AdvanceSalary> allAdvances) async {
-    final approvedAdvances = allAdvances.where((a) => a.status == 'APPROVED').toList();
+    final approvedAdvances = allAdvances
+        .where((a) => a.status == 'APPROVED')
+        .toList();
 
     if (approvedAdvances.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -118,15 +121,21 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('⏳ Generating PDF...')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('⏳ Generating PDF...')));
 
     try {
       final pdf = pw.Document(title: "Approved Advance Requests");
 
       // Prepare the data for the PDF table
-      final headers = ['ID', 'Employee', 'Amount (৳)', 'Reason', 'Requested Date'];
+      final headers = [
+        'ID',
+        'Employee',
+        'Amount (৳)',
+        'Reason',
+        'Requested Date',
+      ];
       final data = approvedAdvances.map((advance) {
         final employeeName = advance.employee != null && advance.employee is Map
             ? advance.employee['name'] ?? 'N/A'
@@ -143,26 +152,37 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
 
       pdf.addPage(
         pw.MultiPage(
-          pageFormat: PdfPageFormat.a4.portrait, //u can Use landscape for more columns
+          pageFormat: PdfPageFormat.a4.portrait,
           header: (pw.Context context) {
             return pw.Center(
               child: pw.Text(
                 'Approved Advance Requests Report',
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 18),
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
             );
           },
           build: (pw.Context context) {
             return [
               pw.SizedBox(height: 10),
-              pw.Text('Total Approved Requests: ${approvedAdvances.length}', style: const pw.TextStyle(fontSize: 12)),
+              pw.Text(
+                'Total Approved Requests: ${approvedAdvances.length}',
+                style: const pw.TextStyle(fontSize: 12),
+              ),
               pw.SizedBox(height: 10),
               pw.Table.fromTextArray(
                 headers: headers,
                 data: data,
                 border: pw.TableBorder.all(color: PdfColors.grey),
-                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
-                headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey700),
+                headerStyle: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.white,
+                ),
+                headerDecoration: const pw.BoxDecoration(
+                  color: PdfColors.blueGrey700,
+                ),
                 cellHeight: 30,
                 cellAlignments: {
                   0: pw.Alignment.centerLeft,
@@ -179,18 +199,18 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
 
       // Use the printing package to share/save the PDF file
       await Printing.sharePdf(
-          bytes: await pdf.save(),
-          filename: 'approved_advances_${DateTime.now().toIso8601String().substring(0, 10)}.pdf'
+        bytes: await pdf.save(),
+        filename:
+            'approved_advances_${DateTime.now().toIso8601String().substring(0, 10)}.pdf',
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('✅ PDF download initiated successfully.')),
       );
-
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error generating PDF: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error generating PDF: $e')));
     }
   }
 
@@ -220,7 +240,7 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
           onChanged: (String? newValue) {
             if (newValue != null) {
               setState(() {
-                _currentFilter = newValue; // Update the filter state
+                _currentFilter = newValue;
               });
             }
           },
@@ -246,7 +266,11 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
     }).toList();
 
     if (filteredAdvances.isEmpty) {
-      return Center(child: Text('No requests found for the selected filter: $_currentFilter.'));
+      return Center(
+        child: Text(
+          'No requests found for the selected filter: $_currentFilter.',
+        ),
+      );
     }
 
     return SingleChildScrollView(
@@ -261,8 +285,9 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
           DataColumn(label: Text('Status')),
           DataColumn(label: Text('Action')),
         ],
-        rows: filteredAdvances.map((advance) { // Use filteredAdvances
-          final employeeName = advance.employee != null && advance.employee is Map
+        rows: filteredAdvances.map((advance) {
+          final employeeName =
+              advance.employee != null && advance.employee is Map
               ? advance.employee['name'] ?? 'N/A'
               : 'N/A';
           final isPending = advance.status == 'PENDING';
@@ -308,13 +333,17 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
     }).toList();
 
     if (filteredAdvances.isEmpty) {
-      return Center(child: Text('No requests found for the selected filter: $_currentFilter.'));
+      return Center(
+        child: Text(
+          'No requests found for the selected filter: $_currentFilter.',
+        ),
+      );
     }
 
     return ListView.builder(
       itemCount: filteredAdvances.length,
       itemBuilder: (context, index) {
-        final advance = filteredAdvances[index]; // Use filteredAdvances
+        final advance = filteredAdvances[index];
         final employeeName = advance.employee != null && advance.employee is Map
             ? advance.employee['name'] ?? 'N/A'
             : 'N/A';
@@ -361,7 +390,8 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
                           icon: const Icon(Icons.check),
                           label: const Text('Approve'),
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green),
+                            backgroundColor: Colors.green,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton.icon(
@@ -369,7 +399,8 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
                           icon: const Icon(Icons.close),
                           label: const Text('Reject'),
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red),
+                            backgroundColor: Colors.red,
+                          ),
                         ),
                       ],
                     ),
@@ -382,14 +413,12 @@ class _AdvanceRequestListPageState extends State<AdvanceRequestListPage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('All Advance Requests'),
         actions: [
-          // The FutureBuilder ensures we pass the full list of data to the download button
           FutureBuilder<List<AdvanceSalary>>(
             future: _futureAdvances,
             builder: (context, snapshot) {

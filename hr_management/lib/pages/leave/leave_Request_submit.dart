@@ -40,7 +40,6 @@ class _LeaveRequestPageState extends State<LeaveRequestPage> {
       setState(() {
         if (isStart) {
           _startDate = picked;
-          // Reset end date if it's before the new start date
           if (_endDate != null && _endDate!.isBefore(_startDate!)) {
             _endDate = null;
           }
@@ -52,7 +51,6 @@ class _LeaveRequestPageState extends State<LeaveRequestPage> {
     }
   }
 
-  // Calculate the difference between start and end dates (inclusive)
   void _calculateLeaveDays() {
     if (_startDate != null && _endDate != null) {
       if (_endDate!.isBefore(_startDate!)) {
@@ -80,38 +78,42 @@ class _LeaveRequestPageState extends State<LeaveRequestPage> {
       });
 
       // Format dates to match Spring Boot's LocalDate (YYYY-MM-DD)
-      final String formattedStartDate = DateFormat('yyyy-MM-dd').format(_startDate!);
-      final String formattedEndDate = DateFormat('yyyy-MM-dd').format(_endDate!);
-      final String formattedRequestedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final String formattedStartDate = DateFormat(
+        'yyyy-MM-dd',
+      ).format(_startDate!);
+      final String formattedEndDate = DateFormat(
+        'yyyy-MM-dd',
+      ).format(_endDate!);
+      final String formattedRequestedDate = DateFormat(
+        'yyyy-MM-dd',
+      ).format(DateTime.now());
 
       final newLeave = Leave(
-        // We set empId so toJson() can correctly format the nested Employee ID
         empId: widget.loggedInEmpId,
-        // The API expects the full nested object on retrieval, but we only need the ID for sending.
-        // We use an empty map here since we rely on empId.
         employee: {},
         startDate: formattedStartDate,
         endDate: formattedEndDate,
         totalLeaveDays: _totalLeaveDays,
         reason: _reasonController.text.trim(),
         requestedDate: formattedRequestedDate,
-        status: 'PENDING', // Default status for a new request
+        status: 'PENDING',
       );
 
       try {
         await _leaveService.applyLeave(newLeave);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Leave request submitted successfully!')),
+            const SnackBar(
+              content: Text('Leave request submitted successfully!'),
+            ),
           );
-          // Navigate back or clear form
           Navigator.pop(context, true);
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to submit leave: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to submit leave: $e')));
         }
       } finally {
         if (mounted) {
@@ -171,7 +173,9 @@ class _LeaveRequestPageState extends State<LeaveRequestPage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: _totalLeaveDays > 0 ? Colors.green : Colors.redAccent,
+                    color: _totalLeaveDays > 0
+                        ? Colors.green
+                        : Colors.redAccent,
                   ),
                 ),
               ),
@@ -206,19 +210,21 @@ class _LeaveRequestPageState extends State<LeaveRequestPage> {
                 ),
                 child: _isLoading
                     ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
                     : const Text(
-                  'Submit Request',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
+                        'Submit Request',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
               ),
-              if (_totalLeaveDays == 0 && _startDate != null && _endDate != null)
+              if (_totalLeaveDays == 0 &&
+                  _startDate != null &&
+                  _endDate != null)
                 const Padding(
                   padding: EdgeInsets.only(top: 8.0),
                   child: Text(

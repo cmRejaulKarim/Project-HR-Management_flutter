@@ -3,18 +3,14 @@ import 'package:hr_management/entity/dept_head.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class DeptHeadService {
   final String baseUrl = 'http://localhost:8085/api/deptHead';
 
-  /// Helper: Get Authorization headers with Bearer token
   Future<Map<String, String>> _getAuthHeaders() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
 
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-    };
+    final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (token != null && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';
@@ -41,10 +37,7 @@ class DeptHeadService {
   /// Get all department heads
   Future<List<DeptHead>> getAll() async {
     final headers = await _getAuthHeaders();
-    final response = await http.get(
-      Uri.parse(baseUrl),
-      headers: headers,
-    );
+    final response = await http.get(Uri.parse(baseUrl), headers: headers);
 
     if (response.statusCode == 200) {
       final List data = json.decode(response.body);

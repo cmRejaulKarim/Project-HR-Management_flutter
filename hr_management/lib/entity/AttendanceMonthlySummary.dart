@@ -4,7 +4,6 @@ class AttendanceMonthlySummary {
   final int presents;
   final int absents;
   final int lates;
-  // Java uses 'long', we use 'int' in Dart since hours are whole numbers
   final int totalOvertimeHours;
 
   AttendanceMonthlySummary({
@@ -18,7 +17,6 @@ class AttendanceMonthlySummary {
 
   factory AttendanceMonthlySummary.fromJson(Map<String, dynamic> json) {
     return AttendanceMonthlySummary(
-      // EmpId is Long in Java, so we use num.toInt() for safety
       empId: (json['empId'] as num).toInt(),
       totalDays: (json['totalDays'] as num).toInt(),
       presents: (json['presents'] as num).toInt(),

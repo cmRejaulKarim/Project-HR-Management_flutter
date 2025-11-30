@@ -9,7 +9,6 @@ import 'package:hr_management/pages/loginpage.dart';
 import 'package:hr_management/service/auth_service.dart';
 import 'package:hr_management/service/department_service.dart';
 import 'package:hr_management/service/designation_service.dart';
-// NOTE: Removed unused import 'package:hr_management/utils/image_picker_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:radio_group_v2/radio_group_v2.dart';
@@ -24,7 +23,6 @@ class Registration extends StatefulWidget {
 }
 
 class _RegistrationState extends State<Registration> {
-  // Define a deep, rich color for the theme accents
   final Color deepPrimary = Colors.indigo.shade800;
 
   bool _obsecurePassword = true;
@@ -61,8 +59,6 @@ class _RegistrationState extends State<Registration> {
   @override
   void initState() {
     super.initState();
-    // FIX: Set default gender directly instead of accessing genderController.value
-    // which causes the "lost track" error because the widget hasn't been built yet.
     selectedGender = 'Male';
     _loadDepartments();
   }
@@ -74,7 +70,6 @@ class _RegistrationState extends State<Registration> {
   }
 
   Future<void> _loadDesignations(int departmentId) async {
-    // Clear previous selection
     selectedDesignation = null;
     designations = await _designationService.getDesignations(departmentId);
     print("Loaded designations: ${designations.length}");
@@ -84,18 +79,13 @@ class _RegistrationState extends State<Registration> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Darker background for "deep color" effect
       backgroundColor: Colors.blueGrey.shade900,
       body: Center(
-        // Use SingleChildScrollView to prevent overflow on small screens
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 550, // Max width for a clean look on desktop/web
-            ),
+            constraints: const BoxConstraints(maxWidth: 550),
             child: Card(
-              // Card view with elevation and rounded corners
               color: Colors.white,
               elevation: 12,
               shape: RoundedRectangleBorder(
@@ -108,12 +98,7 @@ class _RegistrationState extends State<Registration> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // --- Title Section ---
-                      Icon(
-                        Icons.person_add,
-                        size: 60,
-                        color: deepPrimary,
-                      ),
+                      Icon(Icons.person_add, size: 60, color: deepPrimary),
                       const SizedBox(height: 10),
                       Text(
                         'HRMS New Employee Registration',
@@ -127,14 +112,13 @@ class _RegistrationState extends State<Registration> {
                       ),
                       const SizedBox(height: 30),
 
-                      // --- Input Fields with custom styling and validation ---
-
                       _buildTextField(
                         controller: name,
                         label: 'Full Name',
                         icon: Icons.person,
                         keyboardType: TextInputType.text,
-                        validator: (value) => value!.isEmpty ? 'Full name is required' : null,
+                        validator: (value) =>
+                            value!.isEmpty ? 'Full name is required' : null,
                       ),
                       const SizedBox(height: 20.0),
 
@@ -143,7 +127,10 @@ class _RegistrationState extends State<Registration> {
                         label: 'Email',
                         icon: Icons.email,
                         keyboardType: TextInputType.emailAddress,
-                        validator: (value) => !RegExp(r'\S+@\S+\.\S+').hasMatch(value!) ? 'Enter a valid email' : null,
+                        validator: (value) =>
+                            !RegExp(r'\S+@\S+\.\S+').hasMatch(value!)
+                            ? 'Enter a valid email'
+                            : null,
                       ),
                       const SizedBox(height: 20.0),
 
@@ -153,9 +140,13 @@ class _RegistrationState extends State<Registration> {
                         icon: Icons.password,
                         obscureText: _obsecurePassword,
                         onToggle: () {
-                          setState(() => _obsecurePassword = !_obsecurePassword);
+                          setState(
+                            () => _obsecurePassword = !_obsecurePassword,
+                          );
                         },
-                        validator: (value) => value!.length < 6 ? 'Password must be at least 6 characters' : null,
+                        validator: (value) => value!.length < 6
+                            ? 'Password must be at least 6 characters'
+                            : null,
                       ),
                       const SizedBox(height: 20.0),
 
@@ -165,11 +156,14 @@ class _RegistrationState extends State<Registration> {
                         icon: Icons.lock,
                         obscureText: _obsecureConfirmPassword,
                         onToggle: () {
-                          setState(() => _obsecureConfirmPassword = !_obsecureConfirmPassword);
+                          setState(
+                            () => _obsecureConfirmPassword =
+                                !_obsecureConfirmPassword,
+                          );
                         },
                         validator: (value) {
-                          if (value!.isEmpty) return 'Confirm password is required';
-                          // Note: Final match check is done in _register()
+                          if (value!.isEmpty)
+                            return 'Confirm password is required';
                           return null;
                         },
                       ),
@@ -180,7 +174,8 @@ class _RegistrationState extends State<Registration> {
                         label: 'Cell (Phone)',
                         icon: Icons.call,
                         keyboardType: TextInputType.phone,
-                        validator: (value) => value!.isEmpty ? 'Phone number is required' : null,
+                        validator: (value) =>
+                            value!.isEmpty ? 'Phone number is required' : null,
                       ),
                       const SizedBox(height: 20.0),
 
@@ -189,12 +184,11 @@ class _RegistrationState extends State<Registration> {
                         label: 'Address',
                         icon: Icons.maps_home_work_rounded,
                         keyboardType: TextInputType.streetAddress,
-                        validator: (value) => value!.isEmpty ? 'Address is required' : null,
+                        validator: (value) =>
+                            value!.isEmpty ? 'Address is required' : null,
                       ),
                       const SizedBox(height: 20.0),
 
-                      // --- Date of Birth ---
-                      // Re-implemented to use custom decoration and validation
                       DateTimeFormField(
                         decoration: _buildInputDecoration(
                           label: 'Date of Birth (MM/DD/YYYY)',
@@ -202,7 +196,8 @@ class _RegistrationState extends State<Registration> {
                         ),
                         mode: DateTimeFieldPickerMode.date,
                         pickerPlatform: dob,
-                        validator: (value) => value == null ? 'Date of Birth is required' : null,
+                        validator: (value) =>
+                            value == null ? 'Date of Birth is required' : null,
                         onChanged: (DateTime? value) {
                           setState(() {
                             selectedDOB = value;
@@ -212,12 +207,10 @@ class _RegistrationState extends State<Registration> {
 
                       const SizedBox(height: 20.0),
 
-                      // --- Gender Radio Group ---
-                      // Styled using a local Theme to set the active color
                       Theme(
-                        data: Theme.of(context).copyWith(
-                          primaryColor: deepPrimary,
-                        ),
+                        data: Theme.of(
+                          context,
+                        ).copyWith(primaryColor: deepPrimary),
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Column(
@@ -226,7 +219,9 @@ class _RegistrationState extends State<Registration> {
                               Text(
                                 'Gender',
                                 style: TextStyle(
-                                    fontWeight: FontWeight.bold, color: Colors.grey.shade700),
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade700,
+                                ),
                               ),
                               v2.RadioGroup(
                                 controller: genderController,
@@ -261,7 +256,8 @@ class _RegistrationState extends State<Registration> {
                           setState(() => selectedDepartment = value);
                           if (value != null) _loadDesignations(value.id);
                         },
-                        validator: (value) => value == null ? 'Department is required' : null,
+                        validator: (value) =>
+                            value == null ? 'Department is required' : null,
                       ),
 
                       const SizedBox(height: 20.0),
@@ -282,8 +278,13 @@ class _RegistrationState extends State<Registration> {
                         onChanged: (value) {
                           setState(() => selectedDesignation = value);
                         },
-                        validator: (value) => value == null ? 'Designation is required' : null,
-                        hint: Text(selectedDepartment == null ? 'Select Department first' : 'Select Designation'),
+                        validator: (value) =>
+                            value == null ? 'Designation is required' : null,
+                        hint: Text(
+                          selectedDepartment == null
+                              ? 'Select Department first'
+                              : 'Select Designation',
+                        ),
                       ),
 
                       const SizedBox(height: 30.0),
@@ -291,7 +292,10 @@ class _RegistrationState extends State<Registration> {
                       // --- Upload Image Button and Preview ---
                       TextButton.icon(
                         icon: const Icon(Icons.cloud_upload, size: 28),
-                        label: const Text('Upload Profile Image', style: TextStyle(fontSize: 16)),
+                        label: const Text(
+                          'Upload Profile Image',
+                          style: TextStyle(fontSize: 16),
+                        ),
                         onPressed: pickImage,
                         style: TextButton.styleFrom(
                           foregroundColor: deepPrimary,
@@ -326,9 +330,12 @@ class _RegistrationState extends State<Registration> {
                       else
                         Padding(
                           padding: const EdgeInsets.all(10.0),
-                          child: Icon(Icons.account_circle, size: 120, color: Colors.grey.shade300),
+                          child: Icon(
+                            Icons.account_circle,
+                            size: 120,
+                            color: Colors.grey.shade300,
+                          ),
                         ),
-
 
                       const SizedBox(height: 20.0),
 
@@ -365,7 +372,9 @@ class _RegistrationState extends State<Registration> {
                           // Use pushReplacement to navigate and prevent back button issues
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => LoginPage()),
+                            MaterialPageRoute(
+                              builder: (context) => LoginPage(),
+                            ),
                           );
                         },
                         child: Text(
@@ -389,9 +398,11 @@ class _RegistrationState extends State<Registration> {
     );
   }
 
-  // --- Widget Helper Functions for consistent styling ---
-
-  InputDecoration _buildInputDecoration({required String label, required IconData icon, String? hint}) {
+  InputDecoration _buildInputDecoration({
+    required String label,
+    required IconData icon,
+    String? hint,
+  }) {
     return InputDecoration(
       labelText: label,
       hintText: hint,
@@ -447,7 +458,6 @@ class _RegistrationState extends State<Registration> {
     );
   }
 
-
   // --- Image Picker Logic ---
   Future<void> pickImage() async {
     if (kIsWeb) {
@@ -473,32 +483,27 @@ class _RegistrationState extends State<Registration> {
 
   // --- Registration Logic ---
   void _register() async {
-    // ✅ Check if the form (text fields) is valid
     if (_formKey.currentState!.validate()) {
-      // ✅ Check if password and confirm password match
       if (password.text != confirmPassword.text) {
-        // Show an error message if passwords don’t match
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Password does not match')));
-        return; // stop further execution
+        return;
       }
-      // ✅ Validate that a department is selected
       if (selectedDepartment == null || selectedDesignation == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Department or Designation cannot be empty.')),
         );
-        return; // stop further execution
+        return;
       }
 
-      // ✅ Validate that the user has selected an image
       if (kIsWeb) {
         // On Web → check if webImage (Uint8List) is selected
         if (webImage == null) {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text('Please select an image.')));
-          return; // stop further execution
+          return;
         }
       } else {
         // On Mobile/Desktop → check if image file is selected
@@ -506,11 +511,10 @@ class _RegistrationState extends State<Registration> {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text('Please select an image.')));
-          return; // stop further execution
+          return;
         }
       }
 
-      // ✅ Prepare User object (basic login info)
       final user = {
         "name": name.text,
         "email": email.text,
@@ -518,7 +522,6 @@ class _RegistrationState extends State<Registration> {
         "password": password.text,
       };
 
-      // ✅ Prepare employee object (extra personal info)
       final employee = {
         "name": name.text,
         "email": email.text,
@@ -536,39 +539,31 @@ class _RegistrationState extends State<Registration> {
 
       print(employee);
 
-      // ✅ Initialize your API Service
       final apiService = AuthService();
 
-      // ✅ Track API call success or failure
       bool success = false;
 
-      // ✅ Send registration request (different handling for Web vs Mobile)
       if (kIsWeb && webImage != null) {
         // For Web → send photo as bytes
         success = await apiService.registerEmployee(
           user: user,
           employee: employee,
-          photoBytes: webImage!, // safe to use ! because already checked above
+          photoBytes: webImage!,
         );
       } else if (selectedImage != null) {
         // For Mobile → send photo as file
         success = await apiService.registerEmployee(
           user: user,
           employee: employee,
-          photoFile: File(
-            selectedImage!.path,
-          ), // safe to use ! because already checked above
+          photoFile: File(selectedImage!.path),
         );
       }
 
-      // ✅ Handle the API response
       if (success) {
-        // Show success message
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Registration Successful')));
 
-        // Redirect user to Login Page after successful registration
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => LoginPage()),

@@ -32,7 +32,6 @@ class AttendanceService {
     if (response.statusCode == 200) {
       final body = response.body.trim();
 
-      // ✅ Handle empty or blank body
       if (body.isEmpty) {
         print("No attendance log for today.");
         return null;
@@ -72,7 +71,7 @@ class AttendanceService {
   //   }
   // }
 
-  // ✅ All Employees Monthly Attendance
+  //All Employees Monthly Attendance
   Future<List<Attendance>> getAllEmployeesMonthlyAttendance(
     int year,
     int month,
@@ -92,7 +91,7 @@ class AttendanceService {
     }
   }
 
-  // ✅ Single Employee Monthly Attendance
+  //Single Employee Monthly Attendance
   Future<List<Attendance>> getEmployeeMonthlyAttendance(
     int employeeId,
     int year,
@@ -115,7 +114,7 @@ class AttendanceService {
     }
   }
 
-  // ✅ Department Today Log (UPDATED to use new URL and return typed list)
+  // Department Today Log (UPDATED to use new URL and return typed list)
   Future<List<Attendance>> getDepartmentTodayLog() async {
     final headers = await _getHeaders();
     final response = await http.get(
@@ -126,7 +125,6 @@ class AttendanceService {
     if (response.statusCode == 200) {
       try {
         final List<dynamic> data = jsonDecode(response.body);
-        // The DTOs returned by the Spring controller need to be mapped to the Attendance model.
         return data.map((e) => Attendance.fromJson(e)).toList();
       } catch (e) {
         debugPrint('Error decoding department today log JSON: $e');
@@ -138,9 +136,11 @@ class AttendanceService {
     }
   }
 
-  // ✅ Department Monthly Summary (UPDATED to return typed list and parse DTO)
+  //Department Monthly Summary (UPDATED to return typed list and parse DTO)
   Future<List<AttendanceMonthlySummary>> getDepartmentMonthlySummary(
-      int year, int month) async {
+    int year,
+    int month,
+  ) async {
     final headers = await _getHeaders();
     final response = await http.get(
       Uri.parse('$baseUrl/department/monthly-summary?year=$year&month=$month'),
@@ -156,7 +156,9 @@ class AttendanceService {
         return [];
       }
     } else {
-      debugPrint('Failed to get department monthly summary: ${response.statusCode}');
+      debugPrint(
+        'Failed to get department monthly summary: ${response.statusCode}',
+      );
       return [];
     }
   }

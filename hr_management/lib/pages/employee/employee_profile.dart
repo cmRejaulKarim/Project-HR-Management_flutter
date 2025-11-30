@@ -159,7 +159,6 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
   // --- Leave Logic (Called from Dialog) ---
 
   void _calculateTotalLeaveDays() {
-    // Force a re-render of the dialog content to update the days count
     if (_leaveStartDate != null && _leaveEndDate != null) {
       if (_leaveEndDate!.isAfter(_leaveStartDate!) ||
           _leaveEndDate!.isAtSameMomentAs(_leaveStartDate!)) {
@@ -202,13 +201,12 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       if (mounted) Navigator.of(context).pop();
 
       _showSnackBar("Leave request submitted.");
-      // Reset local state after successful submission
       _leaveStartDate = null;
       _leaveEndDate = null;
       _totalLeaveDays = 0;
       _leaveReasonController.clear();
 
-      await _loadDashboardData(); // reload list
+      await _loadDashboardData();
     } catch (e) {
       _showSnackBar("Error submitting leave: $e");
     }
@@ -291,16 +289,8 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
               'DOB',
               widget.profile.dateOfBirth ?? 'N/A',
             ),
-            _profileRow(
-              Icons.work,
-              'Department', // Changed label
-              _departmentName, // Use the fetched name
-            ),
-            _profileRow(
-              Icons.star,
-              'Designation', // Changed label
-              _designationName, // Use the fetched name
-            ),
+            _profileRow(Icons.work, 'Department', _departmentName),
+            _profileRow(Icons.star, 'Designation', _designationName),
             _profileRow(
               Icons.calendar_month,
               'Joining Date',
@@ -332,7 +322,6 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
               text: TextSpan(
                 text: value,
                 style: TextStyle(color: Colors.black, fontSize: 14),
-                // Default style
                 children: [
                   if (statusStyle != null)
                     TextSpan(
@@ -373,7 +362,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       fontSize: 14,
     );
 
-    // Attendance Card - Non-Collapsible
+    // Attendance Card
     return Card(
       elevation: 4,
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -401,7 +390,6 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                   )
                 : Column(
                     children: [
-                      // --- Check-In (with colored Late status) ---
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
                         child: Row(
@@ -435,7 +423,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                         ),
                       ),
 
-                      // --- Check-Out (with colored Absent status) ---
+                      // --- Check-Out ---
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
                         child: Row(
@@ -491,7 +479,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
   }
 
   Widget _buildLeaveHistory() {
-    // Leave History - Non-Collapsible Card (CHANGE)
+    // Leave History
     return Card(
       elevation: 4,
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -524,7 +512,6 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _userLeaves.length > 5 ? 5 : _userLeaves.length,
-                  // Show top 5
                   itemBuilder: (context, index) {
                     final leave = _userLeaves[index];
                     Color statusColor = leave.status == 'APPROVED'
@@ -577,7 +564,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
   }
 
   Widget _buildAdvanceRequestsHistory() {
-    // Advance Requests History - Non-Collapsible Card (CHANGE)
+    // Advance Requests History
     return Card(
       elevation: 4,
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -761,7 +748,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                   border: OutlineInputBorder(),
                 ),
                 initialValue: _totalLeaveDays.toString(),
-                key: ValueKey('LeaveDays$_totalLeaveDays'), // Key for rebuild
+                key: ValueKey('LeaveDays$_totalLeaveDays'),
               ),
               const SizedBox(height: 15),
 
@@ -920,8 +907,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed:
-                _loadDashboardData, // Call the existing data fetching method
+            onPressed: _loadDashboardData,
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -943,14 +929,14 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                 children: [
                   _buildProfileCard(),
                   _buildAttendanceCard(),
-                  _buildLeaveHistory(), // Non-Collapsible History
+                  _buildLeaveHistory(),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 8,
                     ),
                     child: ElevatedButton.icon(
-                      onPressed: _showLeaveRequestDialog, // Trigger Dialog
+                      onPressed: _showLeaveRequestDialog,
                       icon: const Icon(Icons.add),
                       label: const Text("Request Leave"),
                       style: ElevatedButton.styleFrom(
@@ -960,7 +946,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                       ),
                     ),
                   ),
-                  _buildAdvanceRequestsHistory(), // Non-Collapsible History
+                  _buildAdvanceRequestsHistory(),
                 ],
               ),
             ),

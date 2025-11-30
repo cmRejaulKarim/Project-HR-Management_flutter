@@ -1,5 +1,3 @@
-// lib/ui/employee_by_department_page.dart (UPDATED)
-
 import 'package:flutter/material.dart';
 import 'package:hr_management/entity/emp_group_by_dept_dto.dart';
 import 'package:hr_management/entity/employee.dart';
@@ -18,12 +16,9 @@ class _EmployeeByDepartmentPageState extends State<EmployeeByDepartmentPage> {
   final EmployeeService _employeeService = EmployeeService();
   late Future<List<EmpGroupByDeptDTO>> _groupedEmployeesFuture;
 
-  // ✅ 1. Photo URL Helper (Adapted from EmployeeDetails)
   String? _getPhotoUrl(Employee employee) {
     final photo = employee.photo;
     if (photo != null && photo.isNotEmpty) {
-      // NOTE: Ensure this URL matches your Spring Boot file serving configuration!
-      // Adjust the host and port if necessary.
       return 'http://localhost:8085/images/employee/$photo';
     }
     return null;
@@ -32,7 +27,8 @@ class _EmployeeByDepartmentPageState extends State<EmployeeByDepartmentPage> {
   @override
   void initState() {
     super.initState();
-    _groupedEmployeesFuture = _employeeService.getEmployeesGroupedByDepartment();
+    _groupedEmployeesFuture = _employeeService
+        .getEmployeesGroupedByDepartment();
   }
 
   void _navigateToEmployeeDetails(Employee employee) {
@@ -46,9 +42,6 @@ class _EmployeeByDepartmentPageState extends State<EmployeeByDepartmentPage> {
 
   @override
   Widget build(BuildContext context) {
-    // ... (FutureBuilder, Loading, Error, Empty checks remain the same)
-    // ...
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Employees by Department'),
@@ -79,7 +72,10 @@ class _EmployeeByDepartmentPageState extends State<EmployeeByDepartmentPage> {
 
               return Card(
                 elevation: 2,
-                margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                margin: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 8.0,
+                ),
                 child: ExpansionTile(
                   tilePadding: const EdgeInsets.all(16.0),
                   title: Text(
@@ -96,20 +92,27 @@ class _EmployeeByDepartmentPageState extends State<EmployeeByDepartmentPage> {
                     final photoUrl = _getPhotoUrl(employee);
 
                     return ListTile(
-                      contentPadding: const EdgeInsets.only(left: 30, right: 16),
-                      // ✅ 2. Updated leading widget to display the photo or fallback
+                      contentPadding: const EdgeInsets.only(
+                        left: 30,
+                        right: 16,
+                      ),
                       leading: CircleAvatar(
                         radius: 20,
                         backgroundColor: Colors.blueGrey.shade200,
                         backgroundImage: photoUrl != null
                             ? NetworkImage(photoUrl)
-                            : null, // No image provider if photoUrl is null
+                            : null,
                         child: photoUrl == null
                             ? Text(
-                          employee.name.isNotEmpty ? employee.name[0].toUpperCase() : '?',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        )
-                            : null, // No child if image is present
+                                employee.name.isNotEmpty
+                                    ? employee.name[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            : null,
                       ),
 
                       title: Text(
@@ -120,7 +123,9 @@ class _EmployeeByDepartmentPageState extends State<EmployeeByDepartmentPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Email: ${employee.email}'),
-                          Text('Designation: ${employee.designation?.name ?? 'Unknown'}'),
+                          Text(
+                            'Designation: ${employee.designation?.name ?? 'Unknown'}',
+                          ),
                         ],
                       ),
                       onTap: () => _navigateToEmployeeDetails(employee),

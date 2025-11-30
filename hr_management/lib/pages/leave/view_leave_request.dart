@@ -6,7 +6,8 @@ class DepartmentLeaveViewPage extends StatefulWidget {
   const DepartmentLeaveViewPage({super.key});
 
   @override
-  State<DepartmentLeaveViewPage> createState() => _DepartmentLeaveViewPageState();
+  State<DepartmentLeaveViewPage> createState() =>
+      _DepartmentLeaveViewPageState();
 }
 
 class _DepartmentLeaveViewPageState extends State<DepartmentLeaveViewPage> {
@@ -16,18 +17,18 @@ class _DepartmentLeaveViewPageState extends State<DepartmentLeaveViewPage> {
   @override
   void initState() {
     super.initState();
-    // Fetch leaves for the department head's department
+    //leaves for the dept head
     _leavesFuture = _leaveService.getLeavesByDept();
   }
 
-  // Function to refresh the list after an action
+  //refresh
   void _refreshLeaves() {
     setState(() {
       _leavesFuture = _leaveService.getLeavesByDept();
     });
   }
 
-  // Common function to approve or reject a leave request
+  //approve or reject leaves
   Future<void> _updateLeaveStatus(int leaveId, bool isApprove) async {
     try {
       if (isApprove) {
@@ -39,11 +40,13 @@ class _DepartmentLeaveViewPageState extends State<DepartmentLeaveViewPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Leave request ${isApprove ? 'APPROVED' : 'REJECTED'} successfully!'),
+            content: Text(
+              'Leave request ${isApprove ? 'APPROVED' : 'REJECTED'} successfully!',
+            ),
             backgroundColor: isApprove ? Colors.green : Colors.red,
           ),
         );
-        _refreshLeaves(); // Refresh the list
+        _refreshLeaves();
       }
     } catch (e) {
       if (mounted) {
@@ -65,6 +68,18 @@ class _DepartmentLeaveViewPageState extends State<DepartmentLeaveViewPage> {
         return Colors.red;
       default:
         return Colors.grey;
+    }
+  }
+
+  //for sorting
+  int _getStatusOrder(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 1;
+      case 'APPROVED':
+        return 2;
+      default:
+        return 3;
     }
   }
 
@@ -93,13 +108,21 @@ class _DepartmentLeaveViewPageState extends State<DepartmentLeaveViewPage> {
           }
 
           final leaves = snapshot.data!;
+          final sortedLeaves = List<Leave>.from(leaves);
+
+          sortedLeaves.sort((a, b) {
+            return _getStatusOrder(
+              a.status,
+            ).compareTo(_getStatusOrder(b.status));
+          });
 
           return ListView.builder(
             padding: const EdgeInsets.all(8.0),
             itemCount: leaves.length,
             itemBuilder: (context, index) {
-              final leave = leaves[index];
-              final employeeName = leave.employee != null && leave.employee is Map
+              final leave = sortedLeaves[index];
+              final employeeName =
+                  leave.employee != null && leave.employee is Map
                   ? (leave.employee['name'] ?? 'Unknown Employee')
                   : 'N/A';
 
@@ -116,12 +139,18 @@ class _DepartmentLeaveViewPageState extends State<DepartmentLeaveViewPage> {
                         children: [
                           Text(
                             employeeName,
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           Chip(
                             label: Text(
                               leave.status,
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             backgroundColor: _getStatusColor(leave.status),
                           ),
@@ -133,7 +162,7 @@ class _DepartmentLeaveViewPageState extends State<DepartmentLeaveViewPage> {
                       Text('Duration: ${leave.totalLeaveDays} days'),
                       Text('From: ${leave.startDate} to ${leave.endDate}'),
 
-                      // Action buttons for PENDING requests
+                      //buttons for approve and reject
                       if (leave.status.toUpperCase() == 'PENDING')
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
@@ -141,18 +170,32 @@ class _DepartmentLeaveViewPageState extends State<DepartmentLeaveViewPage> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               TextButton.icon(
-                                icon: const Icon(Icons.close, color: Colors.red),
-                                label: const Text('Reject', style: TextStyle(color: Colors.red)),
-                                onPressed: () => _updateLeaveStatus(leave.id!, false),
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.red,
+                                ),
+                                label: const Text(
+                                  'Reject',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                                onPressed: () =>
+                                    _updateLeaveStatus(leave.id!, false),
                               ),
                               const SizedBox(width: 8),
                               ElevatedButton.icon(
-                                icon: const Icon(Icons.check, color: Colors.white),
-                                label: const Text('Approve', style: TextStyle(color: Colors.white)),
+                                icon: const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                ),
+                                label: const Text(
+                                  'Approve',
+                                  style: TextStyle(color: Colors.white),
+                                ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
                                 ),
-                                onPressed: () => _updateLeaveStatus(leave.id!, true),
+                                onPressed: () =>
+                                    _updateLeaveStatus(leave.id!, true),
                               ),
                             ],
                           ),
