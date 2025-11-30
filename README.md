@@ -74,7 +74,8 @@ This repository displays the various screens designed for a comprehensive Human 
 | **Approved Advance Report (Accountant)** | Approved Advance salary report for employees. | ![Approved Advance Report](./UI/AccountantApprovedAdvanceReport.png)     |
 | **Salary Report (Admin)**                | Detailed salary listing for Admin.            | ![Admin Employee Salary](./UI/AdminAllEmployeesSalary.png)               |
 | **Salary Report (Accountant)**           | Filtered view of employee salaries.           | ![Accountant Filtered Salary](./UI/AccountantFilteredEmpSalary.png)      |
-| **Employee Salary Report**               | Comprehensive salary report for an employee.  | ![Accountant Employee Salary Report](./UI/AccountantEmpSalaryReport.png) |
 | **Salary Slip**                          | Generated payslip for an employee.            | ![Accountant Salary Slip](./UI/AccountantEmpSalarySlip.png)              |
+| **Employee Salary Report**               | Comprehensive salary report for an employee.  | ![Accountant Employee Salary Report](./UI/AccountantEmpSalaryReport.png) |
+
 
 ---
