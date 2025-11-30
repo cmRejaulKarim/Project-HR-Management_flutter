@@ -42,38 +42,39 @@ This repository displays the various screens designed for a comprehensive Human 
 
 ### 👥 Employee Management
 
-| Screen                   | Context                                          | Screenshot                                                     |
-| :----------------------- | :----------------------------------------------- | :------------------------------------------------------------- |
-| **All Employees**        | List of all employees (Admin view).              | ![Admin All Employees](./UI/AdminAllEmployees.png)             |
-| **Employee Detail**      | Detailed profile view of an individual employee. | ![Admin Employee Detail](./UI/AdminEmployeeDetail.png)         |
-| **Employee Profile**     | The individual employee's personal profile view. | ![Employee Profile](./UI/EmpProfile.png)                       |
-| **Employee Attendance**  | View/Manage employee attendance records.         | ![Department Head Employee Attendance](./UI/DeptHeadAttendance.png) |
-| **Department Employees** | List of employees specific to a department.      | ![Department Head Employees](./UI/DeptHeadEmps.png)            |
-| **Holiday Calendar**     | View of the official company holidays.           | ![Holiday Calendar](./UI/Holiday.png)                          |
+| Screen                                | Context                                            | Screenshot                                                          |
+| :------------------------------------ | :------------------------------------------------- | :------------------------------------------------------------------ |
+| **All Employees**                     | List of all employees (Admin view).                | ![Admin All Employees](./UI/AdminAllEmployees.png)                  |
+| **Employee Profile (1)**              | The individual employee's personal profile view.   | ![Employee Profile](./UI/EmpProfile.png)                            |
+| **Employee Profile (2)**              | Detailed profile view of an individual employee.   | ![Admin Employee Detail](./UI/AdminEmployeeDetail.png)              |
+| **Department Employees**              | List of employees specific to a department.        | ![Department Head Employees](./UI/DeptHeadEmps.png)                 |
+| **Employee Attendance By Department** | View/Manage employee attendance records.           | ![Department Head Employee Attendance](./UI/DeptHeadAttendance.png) |
+| **Holiday Calendar**                  | View of the official company holidays.             | ![Holiday Calendar](./UI/Holiday.png)                               |
+| **Add/Update Holiday**                | Interface for adding or updating company holidays. | ![Accountant Add Salary](./UI/AccountantHolidayAdd.png)             |
 
 ---
 
 ### 📝 Leave & Advance Management
 
-| Screen                     | Action/Role                                        | Screenshot                                                        |
-| :------------------------- | :------------------------------------------------- | :---------------------------------------------------------------- |
-| **All Approved Leaves**    | List of all approved leave requests (Admin).       | ![Admin All Approved Leaves](./UI/AdminAllApprovedLeaves.png)     |
-| **Dept Head Leave Mgt**    | Leave requests management for Department Head.     | ![Dept Head Leave Management](./UI/DeptHeadLeave.png)          |
-| **Employee Leave Request** | Screen for an employee to request a leave.         | ![Employee Leave Requests](./UI/EmpRequests.png)                  |
-| **Accountant All Advances**     | List of all advance requests (Admin view).    | ![Accountant All Advance Requests](./UI/AccountantAllAdvanceRequests.png)   |
-| **Approved Advances**      | List of approved advance requests (Admin view).    | ![Accountant Approved Advance Requests](./UI/AccountantApprovedAdvance.png) |
-| **Advance Request (Emp)**  | Screen for an employee to request an advance. | ![Employee Advance Request](./UI/EmpAdvance.png)                  |
+| Screen                         | Action/Role                                     | Screenshot                                                                  |
+| :----------------------------- | :---------------------------------------------- | :-------------------------------------------------------------------------- |
+| **All Approved Leaves**        | List of all approved leave requests (Admin).    | ![Admin All Approved Leaves](./UI/AdminAllApprovedLeaves.png)               |
+| **Dept Head Leave Management** | Leave requests management for Department Head.  | ![Dept Head Leave Management](./UI/DeptHeadLeave.png)                       |
+| **Employee Leave Request**     | Screen for an employee to request a leave.      | ![Employee Leave Requests](./UI/EmpRequests.png)                            |
+| **Accountant All Advances**    | List of all advance requests (Admin view).      | ![Accountant All Advance Requests](./UI/AccountantAllAdvanceRequests.png)   |
+| **Approved Advances**          | List of approved advance requests (Admin view). | ![Accountant Approved Advance Requests](./UI/AccountantApprovedAdvance.png) |
+| **Advance Request (Emp)**      | Screen for an employee to request an advance.   | ![Employee Advance Request](./UI/EmpAdvance.png)                            |
 
 ---
 
 ### 💵 Accounting & Salary
 
-| Screen                         | Report Type                                               | Screenshot                                                               |
-| :----------------------------- | :-------------------------------------------------------- | :----------------------------------------------------------------------- |
-| **Salary Report (Admin)**      | Detailed salary listing for Admin.                        | ![Admin Employee Salary](./UI/AdminAllEmployeesSalary.png)               |
-| **Salary Report (Accountant)** | Filtered view of employee salaries.                       | ![Accountant Filtered Salary](./UI/AccountantFilteredEmpSalary.png)      |
-| **Employee Salary Report**     | Comprehensive salary report for an employee.              | ![Accountant Employee Salary Report](./UI/AccountantEmpSalaryReport.png) |
-| **Add/Update Salary**          | Interface for adding or updating employee salary records. | ![Accountant Add Salary](./UI/AccountantHolidayAdd.png)                  |
-| **Salary Slip**                | Generated payslip for an employee.                        | ![Accountant Salary Slip](./UI/AccountantEmpSalarySlip.png)              |
+| Screen                                   | Report Type                                   | Screenshot                                                               |
+| :--------------------------------------- | :-------------------------------------------- | :----------------------------------------------------------------------- |
+| **Approved Advance Report (Accountant)** | Approved Advance salary report for employees. | ![Approved Advance Report](./UI/AccountantApprovedAdvanceReport.png)     |
+| **Salary Report (Admin)**                | Detailed salary listing for Admin.            | ![Admin Employee Salary](./UI/AdminAllEmployeesSalary.png)               |
+| **Salary Report (Accountant)**           | Filtered view of employee salaries.           | ![Accountant Filtered Salary](./UI/AccountantFilteredEmpSalary.png)      |
+| **Employee Salary Report**               | Comprehensive salary report for an employee.  | ![Accountant Employee Salary Report](./UI/AccountantEmpSalaryReport.png) |
+| **Salary Slip**                          | Generated payslip for an employee.            | ![Accountant Salary Slip](./UI/AccountantEmpSalarySlip.png)              |
 
 ---
