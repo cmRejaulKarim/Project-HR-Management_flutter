@@ -45,8 +45,8 @@ This repository displays the various screens designed for a comprehensive Human 
 | Screen                                | Context                                            | Screenshot                                                          |
 | :------------------------------------ | :------------------------------------------------- | :------------------------------------------------------------------ |
 | **All Employees**                     | List of all employees (Admin view).                | ![Admin All Employees](./UI/AdminAllEmployees.png)                  |
-| **Employee Profile (1)**              | The individual employee's personal profile view.   | ![Employee Profile](./UI/EmpProfile.png)                            |
-| **Employee Profile (2)**              | Detailed profile view of an individual employee.   | ![Admin Employee Detail](./UI/AdminEmployeeDetail.png)              |
+| **Employee Profile Detail (1)**              | The individual employee's personal profile view.   | ![Employee Profile](./UI/EmpProfile.png)                            |
+| **Employee Profile Detail (2)**              | Detailed profile view of an individual employee.   | ![Admin Employee Detail](./UI/AdminEmployeeDetail.png)              |
 | **Department Employees**              | List of employees specific to a department.        | ![Department Head Employees](./UI/DeptHeadEmps.png)                 |
 | **Employee Attendance By Department** | View/Manage employee attendance records.           | ![Department Head Employee Attendance](./UI/DeptHeadAttendance.png) |
 | **Holiday Calendar**                  | View of the official company holidays.             | ![Holiday Calendar](./UI/Holiday.png)                               |
