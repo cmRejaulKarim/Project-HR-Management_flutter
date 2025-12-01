@@ -1,6 +1,6 @@
-# 🚀 HRMS (Human Resource Management System) - Flutter UI Showcase
+# 🚀 HRM (Human Resource Management) - Flutter UI Showcase
 
-Welcome to the UI showcase for the **HRMS** web application built with **Flutter**!
+Welcome to the UI showcase for the **HRM** web application built with **Flutter**!
 
 This repository displays the various screens designed for a comprehensive Human Resource Management System, catering to Admins, Department Heads, Accountants, and Employees.
 
